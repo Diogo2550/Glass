@@ -70,19 +70,26 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\HTTP\UserController.cs" />
-    <Compile Include="Controllers\WebSocket\ScheduleController.cs" />
+    <Compile Include="Controllers\WebSocket\Schedule\ScheduleController.cs" />
+    <Compile Include="Controllers\WebSocket\Schedule\ScheduleControllerHandlers.cs" />
     <Compile Include="Core\Database\Builders\MySQLErrorBuilder.cs" />
     <Compile Include="Core\Database\Context.cs" />
     <Compile Include="Core\Enums\AppointmentFrequency.cs" />
     <Compile Include="Core\Enums\AppointmentType.cs" />
     <Compile Include="Core\Enums\EventualState.cs" />
+    <Compile Include="Core\Exceptions\InvalidRequestArgument.cs" />
     <Compile Include="Core\HTTP\Builders\HTTPResponseBuilder.cs" />
     <Compile Include="Core\HTTP\Builders\HTTPRouterBuilder.cs" />
     <Compile Include="Core\HTTP\HTTPRequestInfo.cs" />
     <Compile Include="Core\HTTP\HTTPRouter.cs" />
     <Compile Include="Core\HTTP\Interfaces\IHTTPRouter.cs" />
+    <Compile Include="Core\Repository\LoginRepository.cs" />
     <Compile Include="Core\Repository\ScheduleRepository.cs" />
+    <Compile Include="Core\Util\RegexValidator.cs" />
+    <Compile Include="Core\Util\RequestObjectFactory.cs" />
     <Compile Include="Core\Util\StringManipulation.cs" />
+    <Compile Include="Core\Util\TimeSpanConverter.cs" />
+    <Compile Include="Core\WebSocket\Builders\WebSocketResponseBuilder.cs" />
     <Compile Include="Models\Abstracts\BaseSchedule.cs" />
     <Compile Include="Models\Abstracts\Employee.cs" />
     <Compile Include="Models\Abstracts\Person.cs" />
@@ -103,8 +110,6 @@
     <None Include="Config.json" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Core\WebSocket\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

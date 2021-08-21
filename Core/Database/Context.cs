@@ -1,4 +1,5 @@
 ﻿using MySqlConnector;
+using System;
 using System.Threading.Tasks;
 
 namespace Glass.Core.Database {
@@ -15,7 +16,11 @@ namespace Glass.Core.Database {
                 Password = password
             };
 
-            connection = new MySqlConnection(builder.ConnectionString);
+            try {
+                connection = new MySqlConnection(builder.ConnectionString);
+            } catch (MySqlException) {
+                throw new Exception("Erro ao inicar o MySQL. Verifique se as informações no Config.json estão corretas.");
+            }
         }
 
         public MySqlCommand GetCommand() {

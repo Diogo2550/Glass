@@ -34,6 +34,8 @@ namespace Glass {
             }
 
             config = JObject.Parse(json);
+            reader.Close();
+            file.Close();
         }
 
     }

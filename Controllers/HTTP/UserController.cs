@@ -28,7 +28,7 @@ namespace Glass.Controllers.HTTP {
 
                 using (var reader = command.ExecuteReader()) {
                     string userPassword = null;
-                    while (reader.HasRows) {
+                    if (reader.HasRows) {
                         reader.Read();
                         userPassword = reader.GetFieldValue<string>(0);
 
@@ -49,7 +49,11 @@ namespace Glass.Controllers.HTTP {
                         return;
                     }
 
-                    response.SetData("Seu token é: {fala comigo não lek}");
+                    var data = new {
+                        message = "Usuário logado com sucesso!",
+                        token = "12345"
+                    };
+                    response.SetData(data);
                     response.Reply();
                 }
             }

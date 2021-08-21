@@ -8,6 +8,7 @@ using Glass.Controllers.WebSocket;
 using Glass.Core.Database;
 using Glass.Core.HTTP.Interfaces;
 using Glass.Core.HTTP.Builders;
+using Glass.Core.Repository;
 
 namespace Glass {
 
@@ -29,7 +30,7 @@ namespace Glass {
             server.OnDelete += RequestHandler;
             server.OnPut += RequestHandler;
 
-            server.AddWebSocketService<ScheduleController>("/schedule", () => new ScheduleController(context));
+            server.AddWebSocketService<ScheduleController>("/schedule", () => new ScheduleController(new ScheduleRepository(context)));
             
             server.Start();
             Console.WriteLine("Servidor iniciado! Aguardando requisições...");
@@ -57,13 +58,11 @@ namespace Glass {
             IHTTPRouter router = HTTPRouterBuilder.BuildHTTPRouter(e, context);
             if(router == null) {
                 Console.WriteLine("URL Inválida inserida");
-                JObject jresponse = new JObject();
-                jresponse.Add("code", new JValue(404));
-                jresponse.Add("message", new JValue("Url inválida."));
+                var response = new HTTPResponseBuilder(e.Response);
+                response.SetStatusCode(404);
+                response.SetError("Url inválida");
 
-
-                byte[] response = Encoding.UTF8.GetBytes(jresponse.ToString());
-                e.Response.WriteContent(response);
+                response.Reply();
                 return;
             }
 

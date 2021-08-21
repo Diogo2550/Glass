@@ -34,7 +34,8 @@ namespace Glass.Core.HTTP {
                 GetType()
                     .InvokeMember(methodName, BindingFlags.InvokeMethod, null, this, null);
             } catch(MissingMethodException) {
-                response.SetError($"Método {methodName} inválido");
+                response.SetStatusCode(404);
+                response.SetError($"Não existe o método {methodName} na rota inserida.");
                 response.Reply();
             }
         }
