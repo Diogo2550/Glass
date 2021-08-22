@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,7 +43,11 @@ namespace Glass.Core.WebSocket.Builders {
         }
 
         public void SetData(object data) {
-            replyMessage["data"] = JToken.FromObject(data);
+            replyMessage["data"] = JToken.FromObject(data, new JsonSerializer() {
+                ContractResolver = new DefaultContractResolver() {
+                    NamingStrategy = new CamelCaseNamingStrategy()
+                }
+            });
         }
 
         public string GetResponse() {

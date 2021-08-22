@@ -1,6 +1,7 @@
 ﻿using Glass.Core.Exceptions;
 using Glass.Core.Util;
 using Glass.Core.WebSocket.Builders;
+using Glass.Models;
 using Glass.Models.Abstracts;
 using Newtonsoft.Json.Linq;
 using System;
@@ -29,9 +30,22 @@ namespace Glass.Controllers.WebSocket {
             Send(response.GetResponse());
         }
 
-        // Método não implementado
         private void GET_PATIENT(JObject request, WebSocketResponseBuilder response) {
-            response.SetError("Método ainda não implementado");
+            ushort patientId = request.Value<ushort>("patientId");
+
+            if(patientId == 0) {
+                response.SetError("Por favor, insira um id de paciênte válido!");
+                response.SetStatusCode(400);
+                Send(response.GetResponse());
+                return;
+            }
+
+            var data = new {
+                //patient = repository.GetPatientById(patientId)
+            };
+
+            response.SetData(data);
+            Sessions.Broadcast(response.GetResponse());
         }
 
         private void ADD_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
@@ -46,6 +60,7 @@ namespace Glass.Controllers.WebSocket {
 
             if (!repository.AddScheduleToEmployee(employeeId, schedule)) {
                 response.SetError("Falha ao inserir cronograma ao banco de dados.");
+                response.SetStatusCode(400);
                 Send(response.GetResponse());
                 return;
             }
@@ -60,20 +75,60 @@ namespace Glass.Controllers.WebSocket {
             Sessions.Broadcast(response.GetResponse());
         }
 
-        // Método não implementado
         private void ADD_EVENTUAL_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
-            response.SetError("Método ainda não implementado");
+            ushort employeeId = request.Value<ushort>("employeeId");
+            EventualSchedule eventualSchedule = null;
+            try {
+                //eventualSchedule = RequestObjectFactory.BuildEventualSchedule(request.SelectToken("eventualSchedule"));
+            } catch(InvalidRequestArgument ex) {
+                Send(ex.response.GetResponse());
+                return;
+            }
+
+            if(!repository.AddEventualScheduleToEmployee(employeeId, eventualSchedule)) {
+                response.SetError("Falha ao inserir cronograma eventual");
+                return;
+            }
+
+            var data = new {
+                employeeId = employeeId,
+                eventualSchedule = eventualSchedule
+            };
+
+            response.SetData(data);
+            response.SetStatusCode(201);
+            Sessions.Broadcast(response.GetResponse());
         }
 
-        // Método não implementado
         private void ADD_EMPLOYEE(JObject request, WebSocketResponseBuilder response) {
-            response.SetError("Método ainda não implementado");
+            Employee employee = null;
+            try {
+                //employee = RequestObjectFactory.BuildEmployee(request.SelectToken("employee"));
+            } catch(InvalidRequestArgument ex) {
+                Send(response.GetResponse());
+                return;
+            }
 
+            //if(!repository.AddEmployee(employee)) {
+            //    response.SetError("Falha ao inserir funcionário ao banco de dados");
+            //    response.SetStatusCode(400);
+            //    return;
+            //}
+
+            var data = new {
+                employee = employee
+            };
+
+            response.SetData(data);
+            response.SetStatusCode(201);
+            Sessions.Broadcast(response.GetResponse());
         }
 
         // Método não implementado
         private void ADD_APPOINTMENT(JObject request, WebSocketResponseBuilder response) {
-            response.SetError("Método ainda não implementado");
+            ushort roomId = request.Value<ushort>("roomId");
+            ushort professionalId = request.Value<ushort>("professionalId");
+            ushort patientId = request.Value<ushort>("patientId");
         }
 
         // Método não implementado
