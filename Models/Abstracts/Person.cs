@@ -16,8 +16,6 @@ namespace Glass.Models {
         public string Phone { get; protected set; }
         [JsonProperty]
         public DateTime? Birthday { get; protected set; }
-        [JsonProperty]
-        public string Password { get; protected set; }
 
         public int GetAge() {
             if (Birthday.HasValue) {
@@ -49,10 +47,6 @@ namespace Glass.Models {
 
         public void SetBirthday(DateTime birthday) {
             Birthday = birthday;
-        }
-
-        public void SetPassword(string password) {
-            Password = password;
         }
 
     }

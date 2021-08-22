@@ -30,6 +30,7 @@ namespace Glass.Controllers.WebSocket {
             var data = new {
                 professionals = repository.GetAllProfessionals()
             };
+            response.SetMethod("OPEN");
             response.SetData(data);
 
             Send(response.GetResponse());

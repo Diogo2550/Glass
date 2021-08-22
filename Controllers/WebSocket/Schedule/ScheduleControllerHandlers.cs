@@ -79,7 +79,7 @@ namespace Glass.Controllers.WebSocket {
             ushort employeeId = request.Value<ushort>("employeeId");
             EventualSchedule eventualSchedule = null;
             try {
-                //eventualSchedule = RequestObjectFactory.BuildEventualSchedule(request.SelectToken("eventualSchedule"));
+                eventualSchedule = RequestObjectFactory.BuildEventualSchedule(request.SelectToken("eventualSchedule"));
             } catch(InvalidRequestArgument ex) {
                 Send(ex.response.GetResponse());
                 return;
@@ -103,9 +103,9 @@ namespace Glass.Controllers.WebSocket {
         private void ADD_EMPLOYEE(JObject request, WebSocketResponseBuilder response) {
             Employee employee = null;
             try {
-                //employee = RequestObjectFactory.BuildEmployee(request.SelectToken("employee"));
+                employee = RequestObjectFactory.BuildEmployee(request.SelectToken("employee"));
             } catch(InvalidRequestArgument ex) {
-                Send(response.GetResponse());
+                Send(ex.response.GetResponse());
                 return;
             }
 
@@ -124,58 +124,153 @@ namespace Glass.Controllers.WebSocket {
             Sessions.Broadcast(response.GetResponse());
         }
 
-        // Método não implementado
         private void ADD_APPOINTMENT(JObject request, WebSocketResponseBuilder response) {
             ushort roomId = request.Value<ushort>("roomId");
             ushort professionalId = request.Value<ushort>("professionalId");
             ushort patientId = request.Value<ushort>("patientId");
+
+            Appointment appointment = null;
+            try {
+                //appointment = RequestObjectFactory.BuildAppointment(request.SelectToken("appointment"));
+            } catch (InvalidRequestArgument ex) {
+                Send(ex.response.GetResponse());
+                return;
+            }
+
+            if(!repository.AddAppointmentToEmployee(professionalId, roomId, patientId, appointment)) {
+                response.SetError("Falha ao adicionar consulta para o funcionário.");
+                response.SetStatusCode(400);
+                Send(response.GetResponse());
+                return;
+            }
+
+            var data = new {
+                appointment = appointment
+            };
+
+            response.SetData(data);
+            response.SetStatusCode(201);
+            Sessions.Broadcast(response.GetResponse());
         }
 
-        // Método não implementado
         private void ADD_PATIENT(JObject request, WebSocketResponseBuilder response) {
-            response.SetError("Método ainda não implementado");
+            Patient patient = null;
+            try {
+                patient = RequestObjectFactory.BuildPatient(request.SelectToken("patient"));
+            } catch(InvalidRequestArgument ex) {
+                Send(ex.response.GetResponse());
+                return;
+            }
+
+            //if(!repository.AddPatient(patient)) {
+            //    response.SetError("Falha ao adicionar paciente ao banco de dados.");
+            //    response.SetStatusCode(400);
+            //    Send(response.GetResponse());
+            //    return;
+            //}
+
+            var data = new {
+                patient = patient
+            };
+
+            response.SetData(patient);
+            response.SetStatusCode(201);
+            Sessions.Broadcast(response.GetResponse());
         }
 
         private void DELETE_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
             ushort scheduleId = request.Value<ushort>("scheduleId");
 
             bool deleted = repository.DeleteSchedule(scheduleId);
-
             if (deleted) {
                 var data = new {
                     scheduleId = scheduleId
                 };
 
                 response.SetData(data);
+                Sessions.Broadcast(response.GetResponse());
             } else {
-                response.SetError("Falha ao deletar o cronograma");
-                response.SetStatusCode(200);
+                response.SetError("Falha ao deletar o cronograma.");
+                response.SetStatusCode(400);
 
                 Send(response.GetResponse());
-                return;
             }
-
-            Sessions.Broadcast(response.GetResponse());
         }
 
-        // Método não implementado
         private void DELETE_EVENTUAL_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
-            response.SetError("Método ainda não implementado");
+            ushort eventualScheduleId = request.Value<ushort>("eventualSchedule");
+
+            bool deleted = true; // repository.DeleteEventualSchedule(eventualScheduleId);
+            if(deleted) {
+                var data = new {
+                    eventualScheduleId = eventualScheduleId
+                };
+
+                response.SetData(data);
+                Sessions.Broadcast(response.GetResponse());
+            } else {
+                response.SetError("Falha ao deletar o cronograma eventual.");
+                response.SetStatusCode(400);
+
+                Send(response.GetResponse());
+            }
         }
 
-        // Método não implementado
         private void DELETE_EMPLOYEE(JObject request, WebSocketResponseBuilder response) {
-            response.SetError("Método ainda não implementado");
+            ushort employeeId = request.Value<ushort>("employeeId");
+
+            bool deleted = true; // repository.DeleteEmployee(employeeId);
+            if (deleted) {
+                var data = new {
+                    employeeId = employeeId
+                };
+
+                response.SetData(data);
+                Sessions.Broadcast(response.GetResponse());
+            } else {
+                response.SetError("Falha ao deletar o funcionário.");
+                response.SetStatusCode(400);
+
+                Send(response.GetResponse());
+            }
         }
 
-        // Método não implementado
         private void DELETE_APPOINTMENT(JObject request, WebSocketResponseBuilder response) {
-            response.SetError("Método ainda não implementado");
+            ushort appointmentId = request.Value<ushort>("scheduleId");
+
+            bool deleted = true; // repository.DeleteAppointment(appointmentId);
+            if (deleted) {
+                var data = new {
+                    appointmentId = appointmentId
+                };
+
+                response.SetData(data);
+                Sessions.Broadcast(response.GetResponse());
+            } else {
+                response.SetError("Falha ao deletar a consulta.");
+                response.SetStatusCode(400);
+
+                Send(response.GetResponse());
+            }
         }
 
-        // Método não implementado
         private void DELETE_PATIENT(JObject request, WebSocketResponseBuilder response) {
-            response.SetError("Método ainda não implementado");
+            ushort patientId = request.Value<ushort>("scheduleId");
+
+            bool deleted = true; // repository.DeletePatient(patientId);
+            if (deleted) {
+                var data = new {
+                    patientId = patientId
+                };
+
+                response.SetData(data);
+                Sessions.Broadcast(response.GetResponse());
+            } else {
+                response.SetError("Falha ao deletar o paciente.");
+                response.SetStatusCode(400);
+
+                Send(response.GetResponse());
+            }
         }
 
         private void UPDATE_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
@@ -195,35 +290,90 @@ namespace Glass.Controllers.WebSocket {
                     schedule = schedule
                 };
                 response.SetData(data);
+                Sessions.Broadcast(response.GetResponse());
             } else {
                 response.SetError("Falha ao atualizar cronograma.");
-                response.SetStatusCode(200);
+                response.SetStatusCode(400);
 
                 Send(response.GetResponse());
+            }
+        }
+
+        private void UPDATE_EVENTUAL_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
+            EventualSchedule eventualSchedule = null;
+            ushort employeeId = request.Value<ushort>("employeeId");
+
+            try {
+                eventualSchedule = RequestObjectFactory.BuildEventualSchedule(request.SelectToken("eventualSchedule"));
+            } catch (InvalidRequestArgument ex) {
+                Send(ex.response.GetResponse());
                 return;
             }
 
-            Sessions.Broadcast(response.GetResponse());
+            //if (repository.UpdateEventualSchedule(eventualSchedule)) {
+            //    var data = new {
+            //        employeeId = employeeId,
+            //        eventualSchedule = eventualSchedule
+            //    };
+            //    response.SetData(data);
+            //    Sessions.Broadcast(response.GetResponse());
+            //} else {
+            //    response.SetError("Falha ao atualizar cronograma.");
+            //    response.SetStatusCode(400);
+
+            //    Send(response.GetResponse());
+            //}
         }
 
-        // Método não implementado
-        private void UPDATE_EVENTUAL_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
-            response.SetError("Método ainda não implementado");
-        }
-
-        // Método não implementado
         private void UPDATE_EMPLOYEE(JObject request, WebSocketResponseBuilder response) {
-            response.SetError("Método ainda não implementado");
+            Employee employee = null;
+            ushort employeeId = request.Value<ushort>("employeeId");
+
+            try {
+                employee = RequestObjectFactory.BuildEmployee(request.SelectToken("employee"));
+            } catch (InvalidRequestArgument ex) {
+                Send(ex.response.GetResponse());
+                return;
+            }
+
+            //if (repository.UpdateEmployee(employee)) {
+            //    var data = new {
+            //       employee = employee
+            //    };
+            //    response.SetData(data);
+            //    Sessions.Broadcast(response.GetResponse());
+            //} else {
+            //    response.SetError("Falha ao atualizar cronograma.");
+            //    response.SetStatusCode(400);
+
+            //    Send(response.GetResponse());
+            //}
         }
 
-        // Método não implementado
         private void UPDATE_APPOINTMENT(JObject request, WebSocketResponseBuilder response) {
-            response.SetError("Método ainda não implementado");
+            Appointment appointment = null;
+            ushort employeeId = request.Value<ushort>("employeeId");
+            ushort roomId = request.Value<ushort>("roomId");
+            ushort patientId = request.Value<ushort>("patientId");
+
+            try {
+                //appointment = RequestObjectFactory.BuildAppointment(request.SelectToken("appointment"));
+            } catch (InvalidRequestArgument ex) {
+                Send(ex.response.GetResponse());
+                return;
+            }
+
         }
 
-        // Método não implementado
         private void UPDATE_PATIENT(JObject request, WebSocketResponseBuilder response) {
-            response.SetError("Método ainda não implementado");
+            Patient patient = null;
+            try {
+                patient = RequestObjectFactory.BuildPatient(request.SelectToken("patient"));
+            } catch (InvalidRequestArgument ex) {
+                Send(ex.response.GetResponse());
+                return;
+            }
+
         }
 
     }

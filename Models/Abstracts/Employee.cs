@@ -7,7 +7,9 @@ namespace Glass.Models
 {
     abstract class Employee : Person
     {
-        
+
+        [JsonProperty]
+        public string Password { get; protected set; }
         [JsonProperty]
         protected bool admin = false;
 
@@ -15,6 +17,10 @@ namespace Glass.Models
 
         public string GetToken() {
             return (CPF + RG);
+        }
+
+        public void SetPassword(string password) {
+            Password = password;
         }
 
         public bool VerifyToken(string token) {

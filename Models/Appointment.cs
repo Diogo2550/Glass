@@ -13,13 +13,10 @@ namespace Glass.Models {
         public DateTime AppointmentDate { get; private set; }
         [JsonProperty]
         public AppointmentType AppointmentType { get; private set; }
-        public List<Patient> Patient { get; set; }
-        public List<Room> Room { get; set; }
+        public Patient Patient { get; set; }
+        public Room Room { get; set; }
 
-        public Appointment() {
-            Patient = new List<Patient>();
-            Room = new List<Room>();
-        }
+        public Appointment() { }
 
         public void SetId(ushort id) {
             Id = id;
