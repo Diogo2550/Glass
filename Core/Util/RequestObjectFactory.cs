@@ -31,7 +31,7 @@ namespace Glass.Core.Util {
                 else
                     schedule.SetEndTime(TimeSpan.Parse(endTime));
 
-                if(RegexValidator.IsNumber(id))
+                if(id != null && RegexValidator.IsNumber(id))
                     schedule.SetId(ushort.Parse(id));
 
                 schedule.SetFrequency(ushort.Parse(frequency));

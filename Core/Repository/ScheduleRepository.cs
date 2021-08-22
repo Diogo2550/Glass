@@ -134,6 +134,7 @@ namespace Glass.Core.Repository {
                 command.Parameters.AddWithValue("@employeeId", employeeId);
 
                 int rows = command.ExecuteNonQuery();
+                schedule.SetId((ushort)command.LastInsertedId);
 
                 return (rows > 0) ? true : false;
             }
