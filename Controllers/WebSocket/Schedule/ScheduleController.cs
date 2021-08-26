@@ -52,6 +52,7 @@ namespace Glass.Controllers.WebSocket {
                 return;
             }
 
+            responseBuilder.SetMethod(method);
             // Processar mensagem
             MethodBase handler = this.GetType().GetMethod(method, BindingFlags.NonPublic|BindingFlags.Instance);
             handler.Invoke(this, new object[] { request, responseBuilder });

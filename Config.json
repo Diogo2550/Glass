@@ -3,10 +3,11 @@
     "url": "http://127.0.0.1",
     "port": 9876
   },
+
   "database": {
     "host": "localhost",
     "user": "root",
-    "password": "",
+    "password": "rodri2002",
     "database": "glass"
   }
 }
