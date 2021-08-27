@@ -68,6 +68,9 @@ namespace Glass.Core.Util {
                 else
                     eventualSchedule.SetEndTime(TimeSpan.Parse(endTime));
 
+                eventualSchedule.SetFrequency(ushort.Parse(frequency));
+                eventualSchedule.SetEventualDate(DateTime.Parse(eventualDate));
+                eventualSchedule.SetEventualState(eventualState);
             } catch (Exception) {
                 throw new InvalidRequestArgument();
             }
@@ -79,10 +82,10 @@ namespace Glass.Core.Util {
             Patient patient = new Patient();
 
             var id = patientObject.Value<string>("id");
-            var cpf = patientObject.Value<string>("CPF");
-            var phone = patientObject.Value<string>("telefone");
-            var rg = patientObject.Value<string>("RG");
-            var name = patientObject.Value<string>("name");
+            var cpf = patientObject.Value<string>("cpf");
+            var phone = patientObject.Value<string>("phone");
+            var rg = patientObject.Value<string>("rg");
+            var name = patientObject.Value<string>("fullName");
             var birthday = patientObject.Value<string>("birthday");
 
             try {
@@ -107,14 +110,14 @@ namespace Glass.Core.Util {
             var id = employeeObject.Value<string>("id");
             var name = employeeObject.Value<string>("name");
             var birthday = employeeObject.Value<string>("birthday");
-            var cpf = employeeObject.Value<string>("CPF");
-            var rg = employeeObject.Value<string>("RG");
+            var cpf = employeeObject.Value<string>("cpf");
+            var rg = employeeObject.Value<string>("rg");
             var phone = employeeObject.Value<string>("phone");
             var password = employeeObject.Value<string>("password");
             var admin = employeeObject.Value<string>("admin");
 
             try {
-                if (admin != null && admin == "true")
+                if (admin != null && admin.ToLower() == "true")
                     employee = new Admin();
                 else
                     employee = new Professional();
@@ -122,7 +125,7 @@ namespace Glass.Core.Util {
                 if(id != null && RegexValidator.IsNumber(id))
                     employee.SetId(ushort.Parse(id));
 
-                employee.SetName(id);
+                employee.SetName(name);
                 employee.SetCPF(cpf);
                 employee.SetRG(rg);
                 employee.SetPhone(phone);
@@ -134,5 +137,27 @@ namespace Glass.Core.Util {
 
             return employee;
         }
+    
+        public static Appointment BuildAppointment(JToken appointmentObject) {
+            Appointment appointment = new Appointment();
+
+            var id = appointmentObject.Value<string>("id");
+            var appointmentType = appointmentObject.Value<string>("appointmentType");
+            var appointmentDate = appointmentObject.Value<string>("appointmentDate");
+
+            // TODO - Caso use o sistema de usar os objetos filhos. Preenche-los.
+            try {
+                if(id != null && RegexValidator.IsNumber(id))
+                    appointment.SetId(ushort.Parse(id));
+
+                appointment.SetAppointmentType(appointmentType);
+                appointment.SetAppointmentDate(DateTime.Parse(appointmentDate));
+            } catch (Exception) {
+                throw new InvalidRequestArgument();
+            }
+
+            return appointment;
+        }
+
     }
 }

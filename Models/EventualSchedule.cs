@@ -22,5 +22,9 @@ namespace Glass.Models {
             EventualState = (EventualState)state;
         }
 
+        public void SetEventualState(string state) {
+            EventualState = (EventualState)Enum.Parse(EventualState.GetType(), state);
+        }
+
     }
 }

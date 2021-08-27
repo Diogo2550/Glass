@@ -41,6 +41,10 @@ namespace Glass.Core.WebSocket.Builders {
         public void SetMethod(string method) {
             replyMessage["method"] = JToken.FromObject(method);
         }
+        
+        public void SetComponentId(string componentId) {
+            replyMessage["componentId"] = JToken.FromObject(componentId);
+        }
 
         public void SetData(object data) {
             replyMessage["data"] = JToken.FromObject(data, new JsonSerializer() {

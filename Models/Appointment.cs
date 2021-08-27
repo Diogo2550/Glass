@@ -15,8 +15,13 @@ namespace Glass.Models {
         public AppointmentType AppointmentType { get; private set; }
         public Patient Patient { get; set; }
         public Room Room { get; set; }
+        public Professional Professional { get; set; }
 
-        public Appointment() { }
+        public Appointment() {
+            Room = new Room();
+            Professional = new Professional();
+            Patient = new Patient();
+        }
 
         public void SetId(ushort id) {
             Id = id;
