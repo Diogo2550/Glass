@@ -27,7 +27,7 @@ namespace Glass.Core.HTTP {
         }
 
         public void Open() {
-            string methodName = request.GetListenerRequest().Url.Segments[2].Split('/')[0];
+            string methodName = request.Method;
             methodName = StringManipulation.ToUpperFirstLetter(methodName);
             
             try {

@@ -34,7 +34,7 @@ namespace Glass.Controllers.WebSocket {
             ushort patientId = request.Value<ushort>("patientId");
 
             if(patientId == 0) {
-                response.SetError("Por favor, insira um id de paciênte válido!");
+                response.SetError("Error: era esperado a presença de um patientId");
                 response.SetStatusCode(400);
                 Send(response.GetResponse());
                 return;

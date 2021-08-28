@@ -18,6 +18,7 @@ namespace Glass.Core.HTTP {
          */
         public string Scheme { get; private set; }
         public string RawUrl { get; private set; }
+        public string HttpMethod { get; private set; }
         public string Controller { get; private set; }
         public string Method { get; private set; }
 
@@ -29,9 +30,10 @@ namespace Glass.Core.HTTP {
             SenderAddress = request.UrlReferrer.AbsoluteUri;
             Scheme = request.Url.Scheme;
             Uri = request.Url.AbsoluteUri;
-            Method = request.HttpMethod;
+            HttpMethod = request.HttpMethod;
             Path = request.Url.AbsolutePath;
             Controller = Path.Split('/')[1];
+            Method = Path.Split('/')[2];
 
             body = GetRequestBody();
         }

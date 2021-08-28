@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Specialized;
+using System.Text;
 
 namespace Glass.Core.Database.Builders {
     class MySQLErrorBuilder {
@@ -19,12 +20,12 @@ namespace Glass.Core.Database.Builders {
         }
 
         public string GetEmptyPropertiesError() {
-            string error = "Campo(s) ";
+            StringBuilder error = new StringBuilder("Campo(s) ");
             foreach (DictionaryEntry entry in properties)
-                error += "{" + entry.Key + "} ";
+                error.Append("{" + entry.Key + "} ");
 
-            error += "não pode(m) ser vazio(s)";
-            return error;
+            error.Append("não pode(m) ser vazio(s)");
+            return error.ToString();
         }
 
     }

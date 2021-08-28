@@ -14,39 +14,25 @@ namespace Glass {
 
     class Server {
 
-        private JObject config;
-        private HttpServer server;
+        private HttpServer httpServer;
         private Context context;
 
-        public Server(JObject config) {
-            this.config = config;
-            
-            InitServer();
+        public Server(string url, int port, Context context) {
+            string serverUrl = $"{url}:{port}/";
+
+            httpServer = new HttpServer(serverUrl);
+            this.context = context;
         }
 
         public void Start() {
-            server.OnPost += RequestHandler;
-            server.OnGet += RequestHandler;
-            server.OnDelete += RequestHandler;
-            server.OnPut += RequestHandler;
+            httpServer.OnPost += RequestHandler;
+            httpServer.OnGet += RequestHandler;
+            httpServer.OnDelete += RequestHandler;
+            httpServer.OnPut += RequestHandler;
 
-            server.AddWebSocketService<ScheduleController>("/schedule", () => new ScheduleController(new ScheduleRepository(context)));
-            
-            server.Start();
-            Console.WriteLine("Servidor iniciado! Aguardando requisições...");
-        }
+            httpServer.AddWebSocketService<ScheduleController>("/schedule", () => new ScheduleController(new ScheduleRepository(context)));
 
-        private void InitServer() {
-            string url = config.SelectToken("connection.url").Value<string>();
-            int port = config.SelectToken("connection.port").Value<int>();
-
-            string host = config.SelectToken("database.host").Value<string>();
-            string user = config.SelectToken("database.user").Value<string>();
-            string database = config.SelectToken("database.database").Value<string>();
-            string password = config.SelectToken("database.password").Value<string>();
-
-            server = new HttpServer($"{url}:{port}/");
-            context = new Context(host, database, user, password);
+            httpServer.Start();
         }
 
         private void RequestHandler(object sender, HttpRequestEventArgs e) {
@@ -57,10 +43,10 @@ namespace Glass {
 
             IHTTPRouter router = HTTPRouterBuilder.BuildHTTPRouter(e, context);
             if(router == null) {
-                Console.WriteLine("URL Inválida inserida");
+                Console.WriteLine("A URL requisitada não existe");
                 var response = new HTTPResponseBuilder(e.Response);
                 response.SetStatusCode(404);
-                response.SetError("Url inválida");
+                response.SetError("A URL requisitada não existe");
 
                 response.Reply();
                 return;

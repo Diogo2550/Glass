@@ -8,11 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 
 // Errors:
-// 100 - Erros do cliente
-// 200
-// 300
-// 400
-// 500
+// 100 - Respostas informativas
+// 200 - Respostas de sucesso
+// 300 - 
+// 400 - Erros do cliente
+// 500 - Erros do servidor
 
 namespace Glass.Core.WebSocket.Builders {
     class WebSocketResponseBuilder {
@@ -55,9 +55,6 @@ namespace Glass.Core.WebSocket.Builders {
         }
 
         public string GetResponse() {
-            if (replyMessage == null) {
-                throw new Exception("Tentativa de responder uma mensagem inválida encontrada.");
-            }
             return replyMessage.ToString();
         }
 

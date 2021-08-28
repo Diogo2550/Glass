@@ -1,5 +1,7 @@
 ﻿using MySqlConnector;
 using System;
+using System.Data.Common;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Glass.Core.Database {
@@ -18,8 +20,9 @@ namespace Glass.Core.Database {
 
             try {
                 connection = new MySqlConnection(builder.ConnectionString);
+                connection.Open();
             } catch (MySqlException) {
-                throw new Exception("Erro ao inicar o MySQL. Verifique se as informações no Config.json estão corretas.");
+                throw new ExternalException("Erro ao inicar o MySQL. Verifique se as informações no Config.json estão corretas e tenha certeza de que o processo do mysql foi iniciado.");
             }
         }
 
