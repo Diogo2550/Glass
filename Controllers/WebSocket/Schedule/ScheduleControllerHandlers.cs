@@ -30,6 +30,33 @@ namespace Glass.Controllers.WebSocket {
             Send(response.GetResponse());
         }
 
+        private void GET_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
+            ushort employeeId = request.Value<ushort>("employeeId");
+
+            var data = new {
+                schedules = repository.GetSchedulesFromEmployee(employeeId)
+            };
+
+            response.SetData(data);
+            Send(response.GetResponse());
+        }
+
+        private void GET_ADDITIONAL(JObject request, WebSocketResponseBuilder response) {
+            ushort employeeId = request.Value<ushort>("employeeId");
+            ushort month = request.Value<ushort>("month");
+            int year = request.Value<int>("year");
+
+            year = year == 0 ? (ushort)DateTime.Now.Year : year;
+
+            var data = new {
+                eventualSchedules = repository.GetMonthlyEventualSchedulesFromEmployee(employeeId, month, year),
+                appointments = repository.GetMonthlyAppointmentsFromEmployee(employeeId, month, year)
+            };
+
+            response.SetData(data);
+            Send(response.GetResponse());
+        }
+
         private void GET_PATIENT(JObject request, WebSocketResponseBuilder response) {
             ushort patientId = request.Value<ushort>("patientId");
 
