@@ -85,6 +85,7 @@
     <Compile Include="Core\HTTP\Interfaces\IHTTPRouter.cs" />
     <Compile Include="Core\Repository\LoginRepository.cs" />
     <Compile Include="Core\Repository\ScheduleRepository.cs" />
+    <Compile Include="Core\Util\JWT.cs" />
     <Compile Include="Core\Util\RegexValidator.cs" />
     <Compile Include="Core\Util\RequestObjectFactory.cs" />
     <Compile Include="Core\Util\StringManipulation.cs" />
