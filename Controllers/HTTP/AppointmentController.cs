@@ -3,7 +3,9 @@ using Glass.Core.Exceptions;
 using Glass.Core.HTTP;
 using Glass.Core.Util;
 using Glass.Models;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +20,7 @@ namespace Glass.Controllers.HTTP {
             base.WebSocketClass = "ScheduleController";
         }
 
-        public void MakeAppointment() {
+        public void Make() {
             JObject body = request.GetBodyJson();
 
             ushort roomId = body.Value<ushort>("roomId");
@@ -71,10 +73,14 @@ namespace Glass.Controllers.HTTP {
                     appointment = appointment,
                 }
             };
-            websocket.Sessions.Broadcast(JObject.FromObject(data).ToString());
+            websocket.Sessions.Broadcast(JObject.FromObject(data, new JsonSerializer() {
+                ContractResolver = new DefaultContractResolver() {
+                    NamingStrategy = new CamelCaseNamingStrategy()
+                }
+            }).ToString());
         }
 
-        public void CancelAppointment() {
+        public void Cancel() {
             JObject body = request.GetBodyJson();
 
             ushort appointmentId = body.Value<ushort>("appointmentId");
@@ -83,6 +89,20 @@ namespace Glass.Controllers.HTTP {
                 response.SetStatusCode(400);
                 response.Reply();
                 return;
+            }
+
+            Appointment appointment = new Appointment();
+            using (var command = context.GetCommand()) {
+                command.CommandText = "SELECT * FROM Appointment WHERE id=@id";
+                command.Parameters.AddWithValue("@id", appointmentId);
+
+                using(var reader = command.ExecuteReader()) {
+                    while(reader.Read()) {
+                        appointment.SetId(reader.GetUInt16("id"));
+                        appointment.SetAppointmentDate(reader.GetDateTime("appointmentDate"));
+                        appointment.SetAppointmentType(reader.GetString("appointmentType"));
+                    }
+                }
             }
 
             int deletedId;
@@ -109,10 +129,14 @@ namespace Glass.Controllers.HTTP {
                 success = true,
                 code = 200,
                 data = new {
-                    appointment = deletedId,
+                    appointment = appointment,
                 }
             };
-            websocket.Sessions.Broadcast(JObject.FromObject(data).ToString());
+            websocket.Sessions.Broadcast(JObject.FromObject(data, new JsonSerializer() {
+                ContractResolver = new DefaultContractResolver() {
+                    NamingStrategy = new CamelCaseNamingStrategy()
+                }
+            }).ToString());
         }
 
     }
