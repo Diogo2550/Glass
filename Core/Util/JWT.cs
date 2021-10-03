@@ -53,8 +53,10 @@ namespace Glass.Core.Util {
 
         /** Valida um JWT, informando se ele é válido ou se foi manipulado por entidades externas. */
         public static bool Validate(string token) {
+            if (token == null) return false;
+
             string[] tokenParts = token.Split('.');
-            if(token.Length < 3) return false;
+            if(tokenParts.Length < 3) return false;
 
             string header = tokenParts[0];
             string payload = tokenParts[1];

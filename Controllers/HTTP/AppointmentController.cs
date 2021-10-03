@@ -1,6 +1,7 @@
 ﻿using Glass.Core.Database;
 using Glass.Core.Exceptions;
 using Glass.Core.HTTP;
+using Glass.Core.HTTP.Builders;
 using Glass.Core.Util;
 using Glass.Core.WebSocket.Builders;
 using Glass.Models;
@@ -23,6 +24,11 @@ namespace Glass.Controllers.HTTP {
 
         public void Make() {
             JObject body = request.GetBodyJson();
+
+            if(!Authenticate(response)) {
+                response.Reply();
+                return;
+            }
 
             ushort roomId = body.Value<ushort>("roomId");
             ushort professionalId = body.Value<ushort>("professionalId");
@@ -79,6 +85,11 @@ namespace Glass.Controllers.HTTP {
         public void Cancel() {
             JObject body = request.GetBodyJson();
 
+            if (!Authenticate(response)) {
+                response.Reply();
+                return;
+            }
+
             ushort appointmentId = body.Value<ushort>("appointmentId");
             if(appointmentId == 0) {
                 response.SetError("O campo appointmentId é obrigatório.");
@@ -131,6 +142,19 @@ namespace Glass.Controllers.HTTP {
             wsBuilder.SetData(data);
             wsBuilder.SetMethod("DELETE_APPOINTMENT");
             websocket.Sessions.Broadcast(wsBuilder.GetResponse());
+        }
+
+        private bool Authenticate(HTTPResponseBuilder responseBuilder) {
+            var body = request.GetBodyJson();
+            var token = body.Value<string>("token");
+
+            if (!JWT.Validate(token)) {
+                responseBuilder.SetError("Falha ao verificar sessão. Token inválido.");
+                responseBuilder.SetStatusCode(401);
+
+                return false;
+            }
+            return true;
         }
 
     }

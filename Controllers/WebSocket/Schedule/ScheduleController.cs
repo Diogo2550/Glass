@@ -58,6 +58,16 @@ namespace Glass.Controllers.WebSocket {
                 Send(responseBuilder.GetResponse());
                 return;
             }
+
+            // Autenticação precária
+            var token = request.Value<string>("token");
+            if(!JWT.Validate(token)) {
+                responseBuilder.SetError("Falha ao verificar sessão. Token inválido.");
+                responseBuilder.SetStatusCode(401);
+
+                Send(responseBuilder.GetResponse());
+                return;
+            }
             handler.Invoke(this, new object[] { request, responseBuilder });
         }
 
