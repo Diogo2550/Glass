@@ -12,7 +12,7 @@ namespace Glass.Models {
         [JsonProperty]
         public DateTime AppointmentDate { get; private set; }
         [JsonProperty]
-        public AppointmentType AppointmentType { get; private set; }
+        public string AppointmentType { get; private set; }
         public Patient Patient { get; set; }
         public Room Room { get; set; }
         public Professional Professional { get; set; }
@@ -31,12 +31,8 @@ namespace Glass.Models {
             AppointmentDate = appointmentDate;
         }
 
-        public void SetAppointmentType(AppointmentType appointmentType) {
-            AppointmentType = appointmentType;
-        }
-
         public void SetAppointmentType(string appointmentType) {
-            AppointmentType = (AppointmentType)Enum.Parse(AppointmentType.GetType(), appointmentType);
+            AppointmentType = appointmentType;
         }
 
     }

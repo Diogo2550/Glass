@@ -1,9 +1,11 @@
 ﻿using Glass.Core.Exceptions;
 using Glass.Models;
 using Glass.Models.Abstracts;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -51,7 +53,7 @@ namespace Glass.Core.Util {
             var startTime = eventualScheduleObject.Value<string>("startTime");
             var endTime = eventualScheduleObject.Value<string>("endTime");
             var frequency = eventualScheduleObject.Value<string>("frequency");
-            var eventualDate = eventualScheduleObject.Value<string>("eventualDate");
+            var eventualDate = eventualScheduleObject.SelectToken("eventualDate").ToString();
             var eventualState = eventualScheduleObject.Value<string>("eventualState");
 
             try {
@@ -86,7 +88,7 @@ namespace Glass.Core.Util {
             var phone = patientObject.Value<string>("phone");
             var rg = patientObject.Value<string>("rg");
             var name = patientObject.Value<string>("fullName");
-            var birthday = patientObject.Value<string>("birthday");
+            var birthday = patientObject.SelectToken("birthday").ToString();
 
             try {
                 if(id != null && RegexValidator.IsNumber(id))
@@ -109,7 +111,7 @@ namespace Glass.Core.Util {
 
             var id = employeeObject.Value<string>("id");
             var name = employeeObject.Value<string>("name");
-            var birthday = employeeObject.Value<string>("birthday");
+            var birthday = employeeObject.SelectToken("birthday").ToString();
             var cpf = employeeObject.Value<string>("cpf");
             var rg = employeeObject.Value<string>("rg");
             var phone = employeeObject.Value<string>("phone");
@@ -143,7 +145,7 @@ namespace Glass.Core.Util {
 
             var id = appointmentObject.Value<string>("id");
             var appointmentType = appointmentObject.Value<string>("appointmentType");
-            var appointmentDate = appointmentObject.Value<string>("appointmentDate");
+            var appointmentDate = appointmentObject.SelectToken("appointmentDate").ToString();
 
             // TODO - Caso use o sistema de usar os objetos filhos. Preenche-los.
             try {

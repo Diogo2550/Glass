@@ -14,6 +14,7 @@ using WebSocketSharp;
 using WebSocketSharp.Server;
 
 namespace Glass.Controllers.WebSocket {
+    
     partial class ScheduleController : WebSocketBehavior {
 
         private readonly string[] acceptedMethods = new string[] { 

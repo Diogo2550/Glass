@@ -9,6 +9,7 @@ using Glass.Core.Database.Builders;
 using Glass.Core.HTTP;
 using Glass.Core.Database;
 using System.Security.Cryptography;
+using Glass.Core.Util;
 
 namespace Glass.Controllers.HTTP {
     
@@ -23,14 +24,19 @@ namespace Glass.Controllers.HTTP {
             string password = body.Value<string>("password");
 
             using(var command = context.GetCommand()) {
-                command.CommandText = "SELECT password FROM Employee WHERE cpf=@cpf";
+                command.CommandText = "SELECT password,id,name,admin FROM Employee WHERE cpf=@cpf LIMIT 1";
                 command.Parameters.AddWithValue("@cpf", cpf);
 
                 using (var reader = command.ExecuteReader()) {
-                    string userPassword = null;
+                    string userPassword = null, name = null;
+                    bool isAdmin = false;
+                    int id = 0;
                     if (reader.HasRows) {
                         reader.Read();
                         userPassword = reader.GetFieldValue<string>(0);
+                        id = reader.GetFieldValue<int>(1);
+                        name = reader.GetFieldValue<string>(2);
+                        isAdmin = reader.GetFieldValue<bool>(3);
 
                         reader.NextResult();
                     }
@@ -51,7 +57,7 @@ namespace Glass.Controllers.HTTP {
 
                     var data = new {
                         message = "Usuário logado com sucesso!",
-                        token = "12345"
+                        token = JWT.Create(id, name, isAdmin)
                     };
                     response.SetData(data);
                     response.Reply();

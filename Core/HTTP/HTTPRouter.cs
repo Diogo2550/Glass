@@ -10,20 +10,29 @@ using Glass.Core.Database;
 using Glass.Core.Util;
 using Glass.Core.HTTP.Builders;
 using System;
+using Glass.Core.Repository;
+using WebSocketSharp;
 
 namespace Glass.Core.HTTP {
     abstract class HTTPRouter : IHTTPRouter {
 
+        public string WebSocketClass;
+
         protected HTTPRequestInfo request;
         protected HTTPResponseBuilder response;
         protected Context context;
+        protected WebSocketServiceHost websocket;
 
 
-        public HTTPRouter(HttpRequestEventArgs e, Context context) {
+        public HTTPRouter(HttpRequestEventArgs e, Context c) {
             request = new HTTPRequestInfo(e.Request);
             response = new HTTPResponseBuilder(e.Response);
 
-            this.context = context;
+            context = c;
+        }
+
+        public void SetWebSocket(WebSocketServiceHost websocket) {
+            this.websocket = websocket;
         }
 
         public void Open() {
@@ -32,7 +41,7 @@ namespace Glass.Core.HTTP {
             
             try {
                 GetType()
-                    .InvokeMember(methodName, BindingFlags.InvokeMethod, null, this, null);
+                    .InvokeMember(methodName, BindingFlags.IgnoreCase | BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Instance, null, this, null);
             } catch(MissingMethodException) {
                 response.SetStatusCode(404);
                 response.SetError($"Não existe o método {methodName} na rota inserida.");

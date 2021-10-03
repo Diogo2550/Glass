@@ -12,8 +12,8 @@ using System.Runtime.InteropServices;
 namespace Glass {
     class Program {
 
+        public static JObject config;
         static readonly string path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName;
-        static JObject config;
 
         static void Main(string[] args) {
             try {

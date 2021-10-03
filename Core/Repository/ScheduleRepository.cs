@@ -179,7 +179,7 @@ namespace Glass.Core.Repository {
         public int AddEventualScheduleToEmployee(ushort employeeId, EventualSchedule eventualSchedule) {
             using (var command = context.GetCommand()) {
                 command.CommandText = "INSERT INTO EventualSchedule VALUES(DEFAULT, @eventualDate, @start, @end, @freq, @state, @employeeId)";
-                command.Parameters.AddWithValue("@eventualDate", eventualSchedule.EventualDate.ToString("yyyy-MM-dd hh-mm-ss"));
+                command.Parameters.AddWithValue("@eventualDate", eventualSchedule.EventualDate.ToString("yyyy-MM-dd HH-mm-ss"));
                 command.Parameters.AddWithValue("@start", eventualSchedule.StartTime);
                 command.Parameters.AddWithValue("@end", eventualSchedule.EndTime);
                 command.Parameters.AddWithValue("@freq", eventualSchedule.Frequency);
@@ -195,7 +195,7 @@ namespace Glass.Core.Repository {
         public int AddAppointmentToEmployee(ushort employeeId, ushort roomId, ushort patientId, Appointment appointment) {
             using (var command = context.GetCommand()) {
                 command.CommandText = "INSERT INTO Appointment VALUES(DEFAULT, @date, @type, @employee, @patient, @room)";
-                command.Parameters.AddWithValue("@date", appointment.AppointmentDate.ToString("yyyy-MM-dd hh-mm-ss"));
+                command.Parameters.AddWithValue("@date", appointment.AppointmentDate.ToString("yyyy-MM-dd HH-mm-ss"));
                 command.Parameters.AddWithValue("@type", appointment.AppointmentType.ToString());
                 command.Parameters.AddWithValue("@employee", employeeId);
                 command.Parameters.AddWithValue("@patient", patientId);
@@ -214,7 +214,7 @@ namespace Glass.Core.Repository {
                 command.Parameters.AddWithValue("@cpf", employee.CPF);
                 command.Parameters.AddWithValue("@rg", employee.RG);
                 if(employee.Birthday.HasValue)
-                    command.Parameters.AddWithValue("@birth", employee.Birthday.Value.ToString("yyyy-MM-dd hh-mm-ss"));
+                    command.Parameters.AddWithValue("@birth", employee.Birthday.Value.ToString("yyyy-MM-dd HH-mm-ss"));
                 command.Parameters.AddWithValue("@phone", employee.Phone);
                 command.Parameters.AddWithValue("@password", employee.Password);
                 command.Parameters.AddWithValue("@admin", employee.IsAdmin());
@@ -230,7 +230,7 @@ namespace Glass.Core.Repository {
                 command.CommandText = "INSERT INTO Patient VALUES(DEFAULT, @name, @birth, @cpf, @rg, @phone)";
                 command.Parameters.AddWithValue("@name", patient.Name);
                 if(patient.Birthday.HasValue)
-                    command.Parameters.AddWithValue("@birth", patient.Birthday.Value.ToString("yyyy-MM-dd hh-mm-ss"));
+                    command.Parameters.AddWithValue("@birth", patient.Birthday.Value.ToString("yyyy-MM-dd HH-mm-ss"));
                 command.Parameters.AddWithValue("@cpf", patient.CPF);
                 command.Parameters.AddWithValue("@rg", patient.RG);
                 command.Parameters.AddWithValue("@phone", patient.Phone);

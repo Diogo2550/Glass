@@ -41,7 +41,7 @@ namespace Glass {
             e.Response.AddHeader("Access-Control-Allow-Headers", "Content-Type");
             e.Response.Headers.Add("ContentType", "application/json;charset=UTF-8");
             
-            IHTTPRouter router = HTTPRouterBuilder.BuildHTTPRouter(e, context);
+            IHTTPRouter router = HTTPRouterBuilder.BuildHTTPRouter(e, context, httpServer);
             if(router == null) {
                 Console.WriteLine("A URL requisitada não existe");
                 var response = new HTTPResponseBuilder(e.Response);
