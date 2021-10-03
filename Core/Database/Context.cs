@@ -15,7 +15,8 @@ namespace Glass.Core.Database {
                 Server = host,
                 Database = database,
                 UserID = user,
-                Password = password
+                Password = password,
+                AllowZeroDateTime = true,
             };
 
             try {

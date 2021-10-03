@@ -2,6 +2,7 @@
 using Glass.Core.Exceptions;
 using Glass.Core.HTTP;
 using Glass.Core.Util;
+using Glass.Core.WebSocket.Builders;
 using Glass.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -41,20 +42,20 @@ namespace Glass.Controllers.HTTP {
             appointment.Professional.SetId(professionalId);
             appointment.Patient.SetId(patientId);
 
-            int insertedId;
+            int affectedRows;
             using (var command = context.GetCommand()) {
                 command.CommandText = "INSERT INTO Appointment VALUES(DEFAULT, @date, @type, @employee, @patient, @room)";
-                command.Parameters.AddWithValue("@date", appointment.AppointmentDate.ToString("yyyy-MM-dd HH-mm-ss"));
+                command.Parameters.AddWithValue("@date", appointment.AppointmentDate.ToString("yyyy-MM-dd HH:mm:ss"));
                 command.Parameters.AddWithValue("@type", appointment.AppointmentType.ToString());
                 command.Parameters.AddWithValue("@employee", appointment.Professional.Id);
                 command.Parameters.AddWithValue("@patient", appointment.Patient.Id);
                 command.Parameters.AddWithValue("@room", appointment.Room.Id);
 
-                insertedId = command.ExecuteNonQuery();
+                affectedRows = command.ExecuteNonQuery();
                 appointment.SetId((ushort)command.LastInsertedId);
             }
 
-            if (insertedId == -1) {
+            if (affectedRows == 0) {
                 response.SetError("Falha ao adicionar consulta para o funcionário.");
                 response.SetStatusCode(400);
                 response.Reply();
@@ -66,18 +67,13 @@ namespace Glass.Controllers.HTTP {
             response.Reply();
 
             var data = new {
-                method = "ADD_APPOINTMENT",
-                success = true,
-                code = 200,
-                data = new {
-                    appointment = appointment,
-                }
+                appointment = appointment,
             };
-            websocket.Sessions.Broadcast(JObject.FromObject(data, new JsonSerializer() {
-                ContractResolver = new DefaultContractResolver() {
-                    NamingStrategy = new CamelCaseNamingStrategy()
-                }
-            }).ToString());
+
+            WebSocketResponseBuilder wsBuilder = new WebSocketResponseBuilder();
+            wsBuilder.SetMethod("ADD_APPOINTMENT");
+            wsBuilder.SetData(data);
+            websocket.Sessions.Broadcast(wsBuilder.GetResponse());
         }
 
         public void Cancel() {
@@ -101,20 +97,23 @@ namespace Glass.Controllers.HTTP {
                         appointment.SetId(reader.GetUInt16("id"));
                         appointment.SetAppointmentDate(reader.GetDateTime("appointmentDate"));
                         appointment.SetAppointmentType(reader.GetString("appointmentType"));
+                        appointment.Patient.SetId(reader.GetUInt16("patientId"));
+                        appointment.Professional.SetId(reader.GetUInt16("employeeId"));
+                        appointment.Room.SetId(reader.GetUInt16("roomId"));
                     }
                 }
             }
 
-            int deletedId;
+            int affectedRows;
             using (var command = context.GetCommand()) {
                 command.CommandText = "DELETE FROM Appointment WHERE id=@id";
                 command.Parameters.AddWithValue("@id", appointmentId);
 
-                deletedId = command.ExecuteNonQuery();
+                affectedRows = command.ExecuteNonQuery();
             }
 
-            if (deletedId == -1) {
-                response.SetError("Falha ao cancelar a consulta.");
+            if (affectedRows == 0) {
+                response.SetError($"Não existem uma consulta com o id {appointmentId}");
                 response.SetStatusCode(400);
                 response.Reply();
                 return;
@@ -125,18 +124,13 @@ namespace Glass.Controllers.HTTP {
             response.Reply();
 
             var data = new {
-                method = "DELETE_APPOINTMENT",
-                success = true,
-                code = 200,
-                data = new {
-                    appointment = appointment,
-                }
+                appointment = appointment,
             };
-            websocket.Sessions.Broadcast(JObject.FromObject(data, new JsonSerializer() {
-                ContractResolver = new DefaultContractResolver() {
-                    NamingStrategy = new CamelCaseNamingStrategy()
-                }
-            }).ToString());
+
+            WebSocketResponseBuilder wsBuilder = new WebSocketResponseBuilder();
+            wsBuilder.SetData(data);
+            wsBuilder.SetMethod("DELETE_APPOINTMENT");
+            websocket.Sessions.Broadcast(wsBuilder.GetResponse());
         }
 
     }

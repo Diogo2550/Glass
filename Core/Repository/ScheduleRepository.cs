@@ -3,6 +3,7 @@ using Glass.Models;
 using Glass.Models.Abstracts;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ namespace Glass.Core.Repository {
             this.context = context;
         }
 
+        #region GET
         public Patient GetPatientById(ushort patientId) {
             Patient patient = new Patient();
 
@@ -23,21 +25,51 @@ namespace Glass.Core.Repository {
                 command.CommandText = "SELECT * FROM Patient WHERE id=@id";
                 command.Parameters.AddWithValue("@id", patientId);
 
+                command.Prepare();
                 using (var reader = command.ExecuteReader()) {
                     if(reader.HasRows) {
                         reader.Read();
 
                         patient.SetId(reader.GetUInt16("id"));
-                        patient.SetCPF(reader.GetString("cpf"));
+                        patient.SetCPF(GetStringSafe(reader, "cpf"));
                         patient.SetBirthday(reader.GetDateTime("birthday"));
-                        patient.SetName(reader.GetString("fullName"));
-                        patient.SetPhone(reader.GetString("phone"));
-                        patient.SetRG(reader.GetString("rg"));
+                        patient.SetName(GetStringSafe(reader, "fullName"));
+                        patient.SetPhone(GetStringSafe(reader, "phone"));
+                        patient.SetRG(GetStringSafe(reader, "rg"));
                     }
                 }
             }
 
             return patient;
+        }
+
+        public List<Patient> GetAllPatients() {
+            var patients = new List<Patient>();
+            using (var command = context.GetCommand()) {
+                command.CommandText = "SELECT * FROM Patient";
+
+                command.Prepare();
+                using (var reader = command.ExecuteReader()) {
+                    while (reader.HasRows) {
+                        while (reader.Read()) {
+                            Patient patient = new Patient();
+
+                            patient.SetId(reader.GetUInt16("id"));
+                            patient.SetCPF(GetStringSafe(reader, "cpf"));
+                            patient.SetBirthday(reader.GetDateTime("birthday"));
+                            patient.SetName(GetStringSafe(reader, "fullName"));
+                            patient.SetPhone(GetStringSafe(reader, "phone"));
+                            patient.SetRG(GetStringSafe(reader, "rg"));
+
+                            patients.Add(patient);
+                        }
+
+                        reader.NextResult();
+                    }
+                }
+            }
+
+            return patients;
         }
 
         public List<Schedule> GetSchedulesFromEmployee(ushort employeeId) {
@@ -46,6 +78,7 @@ namespace Glass.Core.Repository {
                 command.CommandText = "SELECT id,dayOfWeek,startTime,endTime,frequency FROM Schedule WHERE employeeId=@employeeId";
                 command.Parameters.AddWithValue("@employeeId", employeeId);
 
+                command.Prepare();
                 using (var reader = command.ExecuteReader()) {
                     while (reader.HasRows) {
                         while (reader.Read()) {
@@ -77,6 +110,8 @@ namespace Glass.Core.Repository {
                 command.Parameters.AddWithValue("@employeeId", employeeId);
                 command.Parameters.AddWithValue("monthStart", startDate);
                 command.Parameters.AddWithValue("monthEnd", endDate);
+               
+                command.Prepare();
                 using (var reader = command.ExecuteReader()) {
                     while (reader.HasRows) {
                         while (reader.Read()) {
@@ -116,17 +151,19 @@ namespace Glass.Core.Repository {
                 command.Parameters.AddWithValue("@employeeId", employeeId);
                 command.Parameters.AddWithValue("@monthStart", startDate);
                 command.Parameters.AddWithValue("@monthEnd", endDate);
+               
+                command.Prepare();
                 using (var reader = command.ExecuteReader()) {
                     while (reader.HasRows) {
                         while (reader.Read()) {
                             Appointment a = new Appointment();
                             a.SetId(reader.GetUInt16(0));
                             a.SetAppointmentDate(reader.GetDateTime(1));
-                            a.SetAppointmentType(reader.GetString(2));
+                            a.SetAppointmentType(GetStringSafe(reader, 2));
                             a.Patient.SetId(reader.GetUInt16(3));
-                            a.Patient.SetName(reader.GetString(4));
+                            a.Patient.SetName(GetStringSafe(reader, 4));
                             a.Room.SetId(reader.GetUInt16(5));
-                            a.Room.SetName(reader.GetString(6));
+                            a.Room.SetName(GetStringSafe(reader, 6));
 
                             appointments.Add(a);
                         }
@@ -148,7 +185,7 @@ namespace Glass.Core.Repository {
                         reader.Read();
 
                         Professional p = new Professional();
-                        p.SetName(reader.GetString(1));
+                        p.SetName(GetStringSafe(reader, 1));
                         p.SetId(reader.GetUInt16(0));
 
                         professionals.Add(p);
@@ -159,7 +196,7 @@ namespace Glass.Core.Repository {
 
             return professionals;
         }
-        
+
         public List<Room> GetAllRooms() {
             List<Room> rooms = new List<Room>();
 
@@ -168,21 +205,25 @@ namespace Glass.Core.Repository {
 
                 using (var reader = command.ExecuteReader()) {
                     while(reader.HasRows) {
-                        Room room = new Room();
-                        
                         while(reader.Read()) {
+                            Room room = new Room();
+
                             room.SetId(reader.GetUInt16("id"));
-                            room.SetName(reader.GetString("name"));
+                            room.SetName(GetStringSafe(reader, "name"));
+
+                            rooms.Add(room);
                         }
 
-                        rooms.Add(room);
+                        reader.NextResult();
                     }
                 }
             }
 
             return rooms;
         }
+        #endregion
 
+        #region ADD
         public int AddScheduleToEmployee(ushort employeeId, Schedule schedule) {
             using(var command = context.GetCommand()) {
                 command.CommandText = "INSERT INTO Schedule VALUES (DEFAULT, @day, @start, @end, @frequency, @employeeId)";
@@ -209,6 +250,7 @@ namespace Glass.Core.Repository {
                 command.Parameters.AddWithValue("@state", eventualSchedule.EventualState);
                 command.Parameters.AddWithValue("@employeeId", employeeId);
 
+                command.Prepare();
                 int rows = command.ExecuteNonQuery();
                 
                 return (rows > 0) ? (short)command.LastInsertedId : -1;
@@ -224,6 +266,7 @@ namespace Glass.Core.Repository {
                 command.Parameters.AddWithValue("@patient", patientId);
                 command.Parameters.AddWithValue("@room", roomId);
 
+                command.Prepare();
                 int rows = command.ExecuteNonQuery();
 
                 return (rows > 0) ? (short)command.LastInsertedId : -1;
@@ -242,6 +285,7 @@ namespace Glass.Core.Repository {
                 command.Parameters.AddWithValue("@password", employee.Password);
                 command.Parameters.AddWithValue("@admin", employee.IsAdmin());
 
+                command.Prepare();
                 int rows = command.ExecuteNonQuery();
                 
                 return (rows > 0) ? (short)command.LastInsertedId : -1;
@@ -258,6 +302,7 @@ namespace Glass.Core.Repository {
                 command.Parameters.AddWithValue("@rg", patient.RG);
                 command.Parameters.AddWithValue("@phone", patient.Phone);
 
+                command.Prepare();
                 int rows = command.ExecuteNonQuery();
 
                 return (rows > 0) ? (short)command.LastInsertedId : -1;
@@ -269,66 +314,14 @@ namespace Glass.Core.Repository {
                 command.CommandText = "INSERT INTO Room VALUES(DEFAULT, @name)";
                 command.Parameters.AddWithValue("@name", room.Name);
 
+                command.Prepare();
                 int rows = command.ExecuteNonQuery();
                 return (rows > 0) ? (short)command.LastInsertedId : -1;
             }
         }
+        #endregion
 
-        public bool DeleteSchedule(ushort scheduleId) {
-            using (var command = context.GetCommand()) {
-                command.CommandText = "DELETE FROM Schedule WHERE id=@id";
-                command.Parameters.AddWithValue("@id", scheduleId);
-
-                int rows = command.ExecuteNonQuery();
-
-                return (rows > 0) ? true : false;
-            }
-        }
-
-        public bool DeleteEventualSchedule(ushort eventualScheduleId) {
-            using (var command = context.GetCommand()) {
-                command.CommandText = "DELETE FROM EventualSchedule WHERE id=@id";
-                command.Parameters.AddWithValue("@id", eventualScheduleId);
-
-                int rows = command.ExecuteNonQuery();
-
-                return (rows > 0) ? true : false;
-            }
-        }
-
-        public bool DeleteEmployee(ushort employeeId) {
-            using (var command = context.GetCommand()) {
-                command.CommandText = "DELETE FROM Employee WHERE id=@id";
-                command.Parameters.AddWithValue("@id", employeeId);
-
-                int rows = command.ExecuteNonQuery();
-
-                return (rows > 0) ? true : false;
-            }
-        }
-
-        public bool DeleteAppointment(ushort appointmentId) {
-            using (var command = context.GetCommand()) {
-                command.CommandText = "DELETE FROM Appointment WHERE id=@id";
-                command.Parameters.AddWithValue("@id", appointmentId);
-
-                int rows = command.ExecuteNonQuery();
-
-                return (rows > 0) ? true : false;
-            }
-        }
-
-        public bool DeletePatient(ushort patientId) {
-            using (var command = context.GetCommand()) {
-                command.CommandText = "DELETE FROM Patient WHERE id=@id";
-                command.Parameters.AddWithValue("@id", patientId);
-
-                int rows = command.ExecuteNonQuery();
-
-                return (rows > 0) ? true : false;
-            }
-        }
-
+        #region UPDATE
         public bool UpdateSchedule(Schedule schedule) {
             using (var command = context.GetCommand()) {
                 command.CommandText = "UPDATE Schedule SET dayOfWeek=@day, startTime=@start, endTime=@end, frequency=@freq WHERE id=@id";
@@ -338,6 +331,7 @@ namespace Glass.Core.Repository {
                 command.Parameters.AddWithValue("@freq", schedule.Frequency);
                 command.Parameters.AddWithValue("@id", schedule.Id);
 
+                command.Prepare();
                 int rows = command.ExecuteNonQuery();
 
                 return (rows > 0) ? true : false;
@@ -354,6 +348,7 @@ namespace Glass.Core.Repository {
                 command.Parameters.AddWithValue("@freq", eventualSchedule.Frequency);
                 command.Parameters.AddWithValue("@id", eventualSchedule.Id);
 
+                command.Prepare();
                 int rows = command.ExecuteNonQuery();
 
                 return (rows > 0) ? true : false;
@@ -370,6 +365,7 @@ namespace Glass.Core.Repository {
                 command.Parameters.AddWithValue("@phone", employee.Phone);
                 command.Parameters.AddWithValue("@id", employee.Id);
 
+                command.Prepare();
                 int rows = command.ExecuteNonQuery();
 
                 return (rows > 0) ? true : false;
@@ -386,6 +382,7 @@ namespace Glass.Core.Repository {
                 command.Parameters.AddWithValue("@rId", appointment.Room.Id);
                 command.Parameters.AddWithValue("@id", appointment.Id);
 
+                command.Prepare();
                 int rows = command.ExecuteNonQuery();
 
                 return (rows > 0) ? true : false;
@@ -402,10 +399,51 @@ namespace Glass.Core.Repository {
                 command.Parameters.AddWithValue("@phone", patient.Phone);
                 command.Parameters.AddWithValue("@id", patient.Id);
 
+                command.Prepare();
                 int rows = command.ExecuteNonQuery();
 
                 return (rows > 0) ? true : false;
             }
+        }
+
+        public bool UpdateRoom(Room room) {
+            using (var command = context.GetCommand()) {
+                command.CommandText = "UPDATE Room SET fullName=@name WHERE id=@id";
+                command.Parameters.AddWithValue("@name", room.Name);
+                command.Parameters.AddWithValue("@id", room.Id);
+
+                command.Prepare();
+                int rows = command.ExecuteNonQuery();
+
+                return (rows > 0) ? true : false;
+            }
+        }
+        #endregion
+
+        #region DELETE
+        public bool DeleteFrom(ushort id, string table) {
+            using (var command = context.GetCommand()) {
+                command.CommandText = $"DELETE FROM {table} WHERE id=@id";
+                command.Parameters.AddWithValue("@id", id);
+
+                command.Prepare();
+                int rows = command.ExecuteNonQuery();
+
+                return (rows > 0) ? true : false;
+            }
+        }
+        #endregion
+
+        // MÉTODOS PARA FACILITAR AS BUSCAS
+        private static string GetStringSafe(IDataReader reader, int colIndex) {
+            if (!reader.IsDBNull(colIndex))
+                return reader.GetString(colIndex);
+            else
+                return null;
+        }
+
+        private static string GetStringSafe(IDataReader reader, string indexName) {
+            return GetStringSafe(reader, reader.GetOrdinal(indexName));
         }
 
     }

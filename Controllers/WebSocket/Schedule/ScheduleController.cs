@@ -17,12 +17,6 @@ namespace Glass.Controllers.WebSocket {
     
     partial class ScheduleController : WebSocketBehavior {
 
-        private readonly string[] acceptedMethods = new string[] { 
-            "GET_ALL", "GET_PATIENT", 
-            "ADD_SCHEDULE",    "ADD_EVENTUAL_SCHEDULE",    "ADD_EMPLOYEE",    "ADD_APPOINTMENT",    "ADD_PATIENT", 
-            "DELETE_SCHEDULE", "DELETE_EVENTUAL_SCHEDULE", "DELETE_EMPLOYEE", "DELETE_APPOINTMENT", "DELETE_PATIENT", 
-            "UPDATE_SCHEDULE", "UPDATE_EVENTUAL_SCHEDULE", "UPDATE_EMPLOYEE", "UPDATE_APPOINTMENT", "UPDATE_PATIENT"
-        };
         private ScheduleRepository repository;
 
         public ScheduleController(ScheduleRepository repo) {
@@ -54,18 +48,16 @@ namespace Glass.Controllers.WebSocket {
                 responseBuilder.SetComponentId(componentId);
             }
 
-            // Verificar existencia do método
-            if(!acceptedMethods.Contains(method)) {
-                responseBuilder.SetError("Médoto inserido não encontrado.");
+            responseBuilder.SetMethod(method);
+            // Processar mensagem
+            MethodBase handler = this.GetType().GetMethod(method, BindingFlags.Public | BindingFlags.Instance);
+            if(handler == null) {
+                responseBuilder.SetError("Médoto não encontrado.");
                 responseBuilder.SetStatusCode(404);
 
                 Send(responseBuilder.GetResponse());
                 return;
             }
-
-            responseBuilder.SetMethod(method);
-            // Processar mensagem
-            MethodBase handler = this.GetType().GetMethod(method, BindingFlags.NonPublic|BindingFlags.Instance);
             handler.Invoke(this, new object[] { request, responseBuilder });
         }
 

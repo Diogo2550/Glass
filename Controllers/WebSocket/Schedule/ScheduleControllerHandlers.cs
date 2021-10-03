@@ -13,7 +13,8 @@ using System.Threading.Tasks;
 namespace Glass.Controllers.WebSocket {
     partial class ScheduleController {
 
-        private void GET_ALL(JObject request, WebSocketResponseBuilder response) {
+        #region GET
+        public void GET_ALL(JObject request, WebSocketResponseBuilder response) {
             ushort employeeId = request.Value<ushort>("employeeId");
             ushort month = request.Value<ushort>("month");
             int year = request.Value<int>("year");
@@ -30,7 +31,7 @@ namespace Glass.Controllers.WebSocket {
             Send(response.GetResponse());
         }
 
-        private void GET_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
+        public void GET_SCHEDULES(JObject request, WebSocketResponseBuilder response) {
             ushort employeeId = request.Value<ushort>("employeeId");
 
             var data = new {
@@ -41,7 +42,7 @@ namespace Glass.Controllers.WebSocket {
             Send(response.GetResponse());
         }
 
-        private void GET_ADDITIONAL(JObject request, WebSocketResponseBuilder response) {
+        public void GET_ADDITIONALS(JObject request, WebSocketResponseBuilder response) {
             ushort employeeId = request.Value<ushort>("employeeId");
             ushort month = request.Value<ushort>("month");
             int year = request.Value<int>("year");
@@ -57,7 +58,7 @@ namespace Glass.Controllers.WebSocket {
             Send(response.GetResponse());
         }
 
-        private void GET_PATIENT(JObject request, WebSocketResponseBuilder response) {
+        public void GET_PATIENT(JObject request, WebSocketResponseBuilder response) {
             ushort patientId = request.Value<ushort>("patientId");
 
             if(patientId == 0) {
@@ -75,7 +76,16 @@ namespace Glass.Controllers.WebSocket {
             Sessions.Broadcast(response.GetResponse());
         }
         
-        private void GET_ALL_ROOMS(JObject request, WebSocketResponseBuilder response) {            
+        public void GET_ALL_PATIENTS(JObject request, WebSocketResponseBuilder response) {
+            var data = new {
+                patients = repository.GetAllPatients()
+            };
+
+            response.SetData(data);
+            Sessions.Broadcast(response.GetResponse());
+        }
+
+        public void GET_ALL_ROOMS(JObject request, WebSocketResponseBuilder response) {            
             var data = new {
                 rooms = repository.GetAllRooms()
             };
@@ -83,8 +93,10 @@ namespace Glass.Controllers.WebSocket {
             response.SetData(data);
             Send(response.GetResponse());
         }
+        #endregion
 
-        private void ADD_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
+        #region ADD
+        public void ADD_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
             ushort employeeId = request.Value<ushort>("employeeId");
             Schedule schedule;
             try {
@@ -113,7 +125,7 @@ namespace Glass.Controllers.WebSocket {
             Sessions.Broadcast(response.GetResponse());
         }
 
-        private void ADD_EVENTUAL_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
+        public void ADD_EVENTUAL_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
             ushort employeeId = request.Value<ushort>("employeeId");
             EventualSchedule eventualSchedule = null;
             try {
@@ -140,7 +152,7 @@ namespace Glass.Controllers.WebSocket {
             Sessions.Broadcast(response.GetResponse());
         }
 
-        private void ADD_EMPLOYEE(JObject request, WebSocketResponseBuilder response) {
+        public void ADD_EMPLOYEE(JObject request, WebSocketResponseBuilder response) {
             Employee employee = null;
             try {
                 employee = RequestObjectFactory.BuildEmployee(request.SelectToken("employee"));
@@ -166,7 +178,7 @@ namespace Glass.Controllers.WebSocket {
             Sessions.Broadcast(response.GetResponse());
         }
 
-        private void ADD_PATIENT(JObject request, WebSocketResponseBuilder response) {
+        public void ADD_PATIENT(JObject request, WebSocketResponseBuilder response) {
             Patient patient = null;
             try {
                 patient = RequestObjectFactory.BuildPatient(request.SelectToken("patient"));
@@ -193,9 +205,9 @@ namespace Glass.Controllers.WebSocket {
             Sessions.Broadcast(response.GetResponse());
         }
 
-        private void ADD_ROOM(JObject request, WebSocketResponseBuilder response) {
+        public void ADD_ROOM(JObject request, WebSocketResponseBuilder response) {
             Room room = null;
-            string roomName = request.Value<string>("roomName");
+            string roomName = request.SelectToken("room").Value<string>("name");
             if(String.IsNullOrEmpty(roomName)) {
                 response.SetError("O parâmetro roomName é obrigatório!");
                 response.SetStatusCode(400);
@@ -222,84 +234,67 @@ namespace Glass.Controllers.WebSocket {
             response.SetStatusCode(201);
             Sessions.Broadcast(response.GetResponse());
         }
+        #endregion
 
-        private void DELETE_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
+        #region DELETE
+        public void DELETE_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
             ushort scheduleId = request.Value<ushort>("scheduleId");
 
-            bool deleted = repository.DeleteSchedule(scheduleId);
-            if (deleted) {
-                var data = new {
-                    scheduleId = scheduleId
-                };
+            bool deleted = repository.DeleteFrom(scheduleId, "Schedule");
+            var data = new {
+                scheduleId = scheduleId
+            };
 
-                response.SetData(data);
-                Sessions.Broadcast(response.GetResponse());
-            } else {
-                response.SetError("Falha ao deletar o cronograma.");
-                response.SetStatusCode(400);
-
-                Send(response.GetResponse());
-            }
+            SendDefaultResponse(deleted, response, data, "Falha ao deleter o cronograma.");
         }
 
-        private void DELETE_EVENTUAL_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
+        public void DELETE_EVENTUAL_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
             ushort eventualScheduleId = request.Value<ushort>("eventualScheduleId");
 
-            bool deleted = repository.DeleteEventualSchedule(eventualScheduleId);
-            if(deleted) {
-                var data = new {
-                    eventualScheduleId = eventualScheduleId
-                };
+            bool deleted = repository.DeleteFrom(eventualScheduleId, "EventualSchedule");
+            var data = new {
+                eventualScheduleId = eventualScheduleId
+            };
 
-                response.SetData(data);
-                Sessions.Broadcast(response.GetResponse());
-            } else {
-                response.SetError("Falha ao deletar o cronograma eventual.");
-                response.SetStatusCode(400);
-
-                Send(response.GetResponse());
-            }
+            SendDefaultResponse(deleted, response, data, "Falha ao deleter o cronograma eventual.");
         }
 
-        private void DELETE_EMPLOYEE(JObject request, WebSocketResponseBuilder response) {
+        public void DELETE_EMPLOYEE(JObject request, WebSocketResponseBuilder response) {
             ushort employeeId = request.Value<ushort>("employeeId");
 
-            bool deleted = repository.DeleteEmployee(employeeId);
-            if (deleted) {
-                var data = new {
-                    employeeId = employeeId
-                };
+            bool deleted = repository.DeleteFrom(employeeId, "Employee");
+            var data = new {
+                employeeId = employeeId
+            };
 
-                response.SetData(data);
-                Sessions.Broadcast(response.GetResponse());
-            } else {
-                response.SetError("Falha ao deletar o funcionário.");
-                response.SetStatusCode(400);
-
-                Send(response.GetResponse());
-            }
+            SendDefaultResponse(deleted, response, data, "Falha ao deleter o funcionário.");
         }
 
-        private void DELETE_PATIENT(JObject request, WebSocketResponseBuilder response) {
+        public void DELETE_PATIENT(JObject request, WebSocketResponseBuilder response) {
             ushort patientId = request.Value<ushort>("patientId");
 
-            bool deleted = repository.DeletePatient(patientId);
-            if (deleted) {
-                var data = new {
-                    patientId = patientId
-                };
+            bool deleted = repository.DeleteFrom(patientId, "Patient");
+            var data = new {
+                patientId = patientId
+            };
 
-                response.SetData(data);
-                Sessions.Broadcast(response.GetResponse());
-            } else {
-                response.SetError("Falha ao deletar o paciente.");
-                response.SetStatusCode(400);
-
-                Send(response.GetResponse());
-            }
+            SendDefaultResponse(deleted, response, data, "Falha ao deleter o paciente.");
         }
 
-        private void UPDATE_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
+        public void DELETE_ROOM(JObject request, WebSocketResponseBuilder response) {
+            ushort roomId = request.Value<ushort>("roomId");
+
+            bool deleted = repository.DeleteFrom(roomId, "Room");
+            var data = new {
+                roomId = roomId
+            };
+
+            SendDefaultResponse(deleted, response, data, "Falha ao deleter o quarto.");
+        }
+        #endregion
+
+        #region UPDATE
+        public void UPDATE_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
             Schedule schedule = null;
             ushort employeeId = request.Value<ushort>("employeeId");
 
@@ -310,22 +305,16 @@ namespace Glass.Controllers.WebSocket {
                 return;
             }
 
-            if (repository.UpdateSchedule(schedule)) {
-                var data = new {
-                    employeeId = employeeId,
-                    schedule = schedule
-                };
-                response.SetData(data);
-                Sessions.Broadcast(response.GetResponse());
-            } else {
-                response.SetError("Falha ao atualizar cronograma.");
-                response.SetStatusCode(400);
+            bool updated = repository.UpdateSchedule(schedule);
+            var data = new {
+                employeeId = employeeId,
+                schedule = schedule
+            };
 
-                Send(response.GetResponse());
-            }
+            SendDefaultResponse(updated, response, data, "Falha ao atualizar o cronograma.");
         }
 
-        private void UPDATE_EVENTUAL_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
+        public void UPDATE_EVENTUAL_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
             EventualSchedule eventualSchedule = null;
             ushort employeeId = request.Value<ushort>("employeeId");
 
@@ -336,22 +325,16 @@ namespace Glass.Controllers.WebSocket {
                 return;
             }
 
-            if (repository.UpdateEventualSchedule(eventualSchedule)) {
-                var data = new {
-                    employeeId = employeeId,
-                    eventualSchedule = eventualSchedule
-                };
-                response.SetData(data);
-                Sessions.Broadcast(response.GetResponse());
-            } else {
-                response.SetError("Falha ao atualizar cronograma.");
-                response.SetStatusCode(400);
+            bool updated = repository.UpdateEventualSchedule(eventualSchedule);
+            var data = new {
+                employeeId = employeeId,
+                eventualSchedule = eventualSchedule
+            };
 
-                Send(response.GetResponse());
-            }
+            SendDefaultResponse(updated, response, data, "Falha ao atualizar o cronograma eventual.");
         }
 
-        private void UPDATE_EMPLOYEE(JObject request, WebSocketResponseBuilder response) {
+        public void UPDATE_EMPLOYEE(JObject request, WebSocketResponseBuilder response) {
             Employee employee = null;
 
             try {
@@ -361,21 +344,15 @@ namespace Glass.Controllers.WebSocket {
                 return;
             }
 
-            if (repository.UpdateEmployee(employee)) {
-                var data = new {
-                    employee = employee
-                };
-                response.SetData(data);
-                Sessions.Broadcast(response.GetResponse());
-            } else {
-                response.SetError("Falha ao atualizar cronograma.");
-                response.SetStatusCode(400);
+            bool updated = repository.UpdateEmployee(employee);
+            var data = new {
+                employee = employee
+            };
 
-                Send(response.GetResponse());
-            }
+            SendDefaultResponse(updated, response, data, "Falha ao atualizar o funcionário.");
         }
 
-        private void UPDATE_APPOINTMENT(JObject request, WebSocketResponseBuilder response) {
+        public void UPDATE_APPOINTMENT(JObject request, WebSocketResponseBuilder response) {
             Appointment appointment = null;
             ushort employeeId = request.Value<ushort>("employeeId");
             ushort roomId = request.Value<ushort>("roomId");
@@ -391,22 +368,16 @@ namespace Glass.Controllers.WebSocket {
                 return;
             }
 
-            if (repository.UpdateAppointment(appointment)) {
-                var data = new {
-                    employeeId = employeeId,
-                    appointment = appointment
-                };
-                response.SetData(data);
-                Sessions.Broadcast(response.GetResponse());
-            } else {
-                response.SetError("Falha ao atualizar cronograma.");
-                response.SetStatusCode(400);
+            bool updated = repository.UpdateAppointment(appointment);
+            var data = new {
+                employeeId = employeeId,
+                appointment = appointment
+            };
 
-                Send(response.GetResponse());
-            }
+            SendDefaultResponse(updated, response, data, "Falha ao atualizar a consulta.");
         }
 
-        private void UPDATE_PATIENT(JObject request, WebSocketResponseBuilder response) {
+        public void UPDATE_PATIENT(JObject request, WebSocketResponseBuilder response) {
             Patient patient = null;
             try {
                 patient = RequestObjectFactory.BuildPatient(request.SelectToken("patient"));
@@ -415,19 +386,48 @@ namespace Glass.Controllers.WebSocket {
                 return;
             }
 
-            if (repository.UpdatePatient(patient)) {
-                var data = new {
-                    patient = patient
-                };
+            bool updated = repository.UpdatePatient(patient);
+            var data = new {
+                patient = patient
+            };
+
+            SendDefaultResponse(updated, response, data, "Falha ao atualizar o paciente.");
+        }
+
+        public void UPDATE_ROOM(JObject request, WebSocketResponseBuilder response) {
+            Room room = null;
+            ushort roomId = request.SelectToken("room").Value<ushort>("roomId");
+            string roomName = request.SelectToken("room").Value<string>("roomName");
+            if(roomId == 0) {
+                response.SetError("O parâmetro roomId é obrigatório.");
+                response.SetStatusCode(400);
+                Send(response.GetResponse());
+                return;
+            }
+
+            room.SetId(roomId);
+            var data = new {
+                room = room
+            };
+            
+            bool updated = repository.UpdateRoom(room);
+            SendDefaultResponse(updated, response, data, "Falha ao atulizar o quarto.");
+        }
+        #endregion
+
+        
+
+        // MÉTODOS UTILITÁRIOS
+        private void SendDefaultResponse(bool success, WebSocketResponseBuilder response, object data, string errorMessage = "Error") {
+            if (success) {
                 response.SetData(data);
                 Sessions.Broadcast(response.GetResponse());
             } else {
-                response.SetError("Falha ao atualizar cronograma.");
+                response.SetError(errorMessage);
                 response.SetStatusCode(400);
 
                 Send(response.GetResponse());
             }
         }
-
     }
 }

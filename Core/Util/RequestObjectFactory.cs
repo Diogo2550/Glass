@@ -28,7 +28,7 @@ namespace Glass.Core.Util {
                     schedule.SetStartTime(new TimeSpan(long.Parse(startTime)));
                 else
                     schedule.SetStartTime(TimeSpan.Parse(startTime));
-
+                
                 if (RegexValidator.IsNumber(endTime))
                     schedule.SetEndTime(new TimeSpan(long.Parse(endTime)));
                 else

@@ -142,16 +142,19 @@ Abaixo serão listados todos os end-points de forma detalhada.
 
 <details>
     <summary>onOpen:</summary>
-    
+  
     Retorno:
         method = “OPEN”
         code: int;
             success: bool;
             error?: string;
-        data?: {
-            prefessionals: Array&lt;Professional&gt;;
-        }
+            data?: {
+                prefessionals: Array&lt;Professional&gt;;
+            }
 </details>
+<br>
+<details>
+    <summary>GET</summary>
 
 <details>
     <summary>GET_ALL:</summary>
@@ -165,41 +168,43 @@ Abaixo serão listados todos os end-points de forma detalhada.
         componentId?: string;
 
     Retorno:
+        method = “GET_ALL”;
         code: int;
         success: bool;
         componentId?: string;
         error?: string;
         data?: {
             appointments: Array<Appointment>;
-            schedule: Array<Schedule>;
-            eventualSchedule: Array<Schedule>;
+            schedules: Array<Schedule>;
+            eventualSchedules: Array<Schedule>;
         }
 </details>
 
 <details>
-    <summary>GET_SCHEDULE:</summary>
+    <summary>GET_SCHEDULES:</summary>
     
     Envio:
-        method = “GET_SCHEDULE”;
+        method = “GET_SCHEDULES”;
         token: string;
         employeeId: int;
         componentId?: string;
 
     Retorno:
+        method = “GET_SCHEDULES”;
         code: int;
         success: bool;
         componentId?: string;
         error?: string;
         data?: {
-            schedule: Array<Schedule>;
+            schedules: Array<Schedule>;
         }
 </details>
 
 <details>
-    <summary>GET_ADDITIONAL:</summary>
+    <summary>GET_ADDITIONALS:</summary>
 
     Envio:
-        method = “GET_ADDITIONAL”;
+        method = “GET_ADDITIONALS”;
         token: string;
         employeeId: int;
         month: int; (janeiro = 0)
@@ -207,13 +212,14 @@ Abaixo serão listados todos os end-points de forma detalhada.
         componentId?: string;
 
     Retorno:
+        method = “GET_ADDITIONALS”;
         code: int;
         success: bool;
         componentId?: string;
         error?: string;
         data?: {
             appointments: Array<Appointment>;
-            eventualSchedule: Array<Schedule>;
+            eventualSchedules: Array<Schedule>;
         }
 </details>
 
@@ -227,6 +233,7 @@ Abaixo serão listados todos os end-points de forma detalhada.
         componentId?: string;
 
     Retorno:
+        method = “GET_PATIENT”;
         code: int;
         success: bool;
         componentId?: string;
@@ -237,12 +244,31 @@ Abaixo serão listados todos os end-points de forma detalhada.
 </details>
 
 <details>
+    <summary>GET_ALL_PATIENTS:</summary>
+
+    Envio:
+        method = “GET_ALL_PATIENTS”;
+        componentId?: string;
+
+    Retorno:
+        method = “GET_ALL_PATIENTS”;
+        code: int;
+        success: bool;
+        componentId?: string;
+        error?: string;
+        data?: {
+            patients: Array<Patient>;
+        }
+</details>
+
+<details>
     <summary>GET_ALL_ROOMS:</summary>
 
     Envio:
         method = "GET_ALL_ROOMS";
 
     Retorno:
+        method = "GET_ALL_ROOMS";
         code: int;
         success: bool;
         componentId?: string;
@@ -251,7 +277,10 @@ Abaixo serão listados todos os end-points de forma detalhada.
             rooms: Array<Room>
         }
 </details>
-
+</details>
+<br>
+<details>
+    <summary>ADD</summary>
 <details>
     <summary>ADD_SCHEDULE:</summary>
 
@@ -322,7 +351,7 @@ Abaixo serão listados todos os end-points de forma detalhada.
     Envio:
         method = “ADD_PATIENT”;
         token: string;
-        patient: Patient.
+        patient: Patient;
         componentId?: string;
 
     Retorno - ALL:
@@ -342,7 +371,7 @@ Abaixo serão listados todos os end-points de forma detalhada.
 
     Envio:
         method = "ADD_ROOM";
-        roomName: string;
+        Room: Room;
         componentId?: string;
 
     Retorno - ALL:
@@ -355,7 +384,10 @@ Abaixo serão listados todos os end-points de forma detalhada.
             room: Room
         }
 </details>
-
+</details>
+<br>
+<details>
+    <summary>DELETE</summary>
 <details>
     <summary>DELETE_SCHEDULE:</summary>
 
@@ -437,12 +469,36 @@ Abaixo serão listados todos os end-points de forma detalhada.
 </details>
 
 <details>
+    <summary>DELETE_ROOM:</summary>
+
+    Envio:
+        method = “DELETE_ROOM”
+        token: string;
+        roomId: int;
+        componentId?: string;
+
+    Retorno - ALL:
+        method = “DELETE_ROOM”;
+        code: int;
+        success: bool;
+        componentId?: string;
+        error?: string;
+        data?: {
+            roomId: int
+        }
+</details>
+</details>
+<br>
+<details>
+    <summary>UPDATE</summary>
+<details>
     <summary>UPDATE_SCHEDULE:</summary>
 
     Envio:
         method = “UPDATE_SCHEDULE”;
         token: string;
         componentId?: string;
+        employeeId: int;
         schedule: Schedule;
 
     Retorno - ALL:
@@ -452,6 +508,7 @@ Abaixo serão listados todos os end-points de forma detalhada.
         componentId?: string;
         error?: string;
         data?: {
+            employeeId: employeeId;
             schedule: Schedule;
         }
 </details>
@@ -464,6 +521,7 @@ Abaixo serão listados todos os end-points de forma detalhada.
         token: string;
         componentId?: string;
         eventualSchedule: eventualSchedule;
+        employeeId: int
 
     Retorno - ALL:
         method = “UPDATE_EVENTUAL_SCHEDULE”;
@@ -472,6 +530,7 @@ Abaixo serão listados todos os end-points de forma detalhada.
         componentId?: string;
         error?: string;
         data?: {
+            employeeId: int;
             eventualSchedule: eventualSchedule;
         }
 </details>
@@ -501,8 +560,8 @@ Abaixo serão listados todos os end-points de forma detalhada.
 
     Envio:
         method = “UPDATE_APPOINTMENT”;
-        token: string;;
-        professionalId: int;
+        token: string;
+        employeeId: int;
         roomId: int;
         patientId: int;
         appointment: Appointment;
@@ -539,6 +598,27 @@ Abaixo serão listados todos os end-points de forma detalhada.
         data?: {
             patient: Patient;
         }
+</details>
+
+<details>
+    <summary>UPDATE_ROOM:</summary>
+
+    Envio:
+        method = “UPDATE_ROOM”;
+        token: string;
+        room: Room;
+        componentId?: string;
+
+    Retorno - ALL:
+        method = “UPDATE_ROOM”;
+        code: int;
+        success: bool;
+        componentId?: string;
+        error?: string;
+        data?: {
+            room: Room;
+        }
+</details>
 </details>
 <br>
 
