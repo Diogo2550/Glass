@@ -65,7 +65,11 @@ namespace Glass.Controllers.HTTP {
             appointment.SetId((ushort)insertedId);
             var data = new {
                 method = "ADD_APPOINTMENT",
-                appointment = appointment
+                success = true,
+                code = 200,
+                data = new {
+                    appointment = appointment,
+                }
             };
             websocket.Sessions.Broadcast(JObject.FromObject(data).ToString());
         }
@@ -102,7 +106,11 @@ namespace Glass.Controllers.HTTP {
 
             var data = new {
                 method = "DELETE_APPOINTMENT",
-                appointmentId = deletedId
+                success = true,
+                code = 200,
+                data = new {
+                    appointment = deletedId,
+                }
             };
             websocket.Sessions.Broadcast(JObject.FromObject(data).ToString());
         }

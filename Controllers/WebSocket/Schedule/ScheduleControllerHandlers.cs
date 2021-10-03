@@ -74,6 +74,15 @@ namespace Glass.Controllers.WebSocket {
             response.SetData(data);
             Sessions.Broadcast(response.GetResponse());
         }
+        
+        private void GET_ALL_ROOMS(JObject request, WebSocketResponseBuilder response) {            
+            var data = new {
+                rooms = repository.GetAllRooms()
+            };
+
+            response.SetData(data);
+            Send(response.GetResponse());
+        }
 
         private void ADD_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
             ushort employeeId = request.Value<ushort>("employeeId");
@@ -157,37 +166,6 @@ namespace Glass.Controllers.WebSocket {
             Sessions.Broadcast(response.GetResponse());
         }
 
-        private void ADD_APPOINTMENT(JObject request, WebSocketResponseBuilder response) {
-            ushort roomId = request.Value<ushort>("roomId");
-            ushort professionalId = request.Value<ushort>("professionalId");
-            ushort patientId = request.Value<ushort>("patientId");
-
-            Appointment appointment = null;
-            try {
-                appointment = RequestObjectFactory.BuildAppointment(request.SelectToken("appointment"));
-            } catch (InvalidRequestArgument ex) {
-                Send(ex.response.GetResponse());
-                return;
-            }
-
-            int insertedId = repository.AddAppointmentToEmployee(professionalId, roomId, patientId, appointment);
-            if (insertedId == -1) {
-                response.SetError("Falha ao adicionar consulta para o funcionário.");
-                response.SetStatusCode(400);
-                Send(response.GetResponse());
-                return;
-            }
-
-            appointment.SetId((ushort)insertedId);
-            var data = new {
-                appointment = appointment
-            };
-
-            response.SetData(data);
-            response.SetStatusCode(201);
-            Sessions.Broadcast(response.GetResponse());
-        }
-
         private void ADD_PATIENT(JObject request, WebSocketResponseBuilder response) {
             Patient patient = null;
             try {
@@ -208,6 +186,36 @@ namespace Glass.Controllers.WebSocket {
             patient.SetId((ushort)insertedId);
             var data = new {
                 patient = patient
+            };
+
+            response.SetData(data);
+            response.SetStatusCode(201);
+            Sessions.Broadcast(response.GetResponse());
+        }
+
+        private void ADD_ROOM(JObject request, WebSocketResponseBuilder response) {
+            Room room = null;
+            string roomName = request.Value<string>("roomName");
+            if(String.IsNullOrEmpty(roomName)) {
+                response.SetError("O parâmetro roomName é obrigatório!");
+                response.SetStatusCode(400);
+                Send(response.GetResponse());
+                return;
+            }
+
+            room = new Room();
+            room.SetName(roomName);
+
+            int insertedId = repository.AddRoom(room);
+            if (insertedId == -1) {
+                response.SetError("Falha ao inserir funcionário ao banco de dados");
+                response.SetStatusCode(400);
+                return;
+            }
+
+            room.SetId((ushort)insertedId);
+            var data = new {
+                room = room
             };
 
             response.SetData(data);
@@ -266,25 +274,6 @@ namespace Glass.Controllers.WebSocket {
                 Sessions.Broadcast(response.GetResponse());
             } else {
                 response.SetError("Falha ao deletar o funcionário.");
-                response.SetStatusCode(400);
-
-                Send(response.GetResponse());
-            }
-        }
-
-        private void DELETE_APPOINTMENT(JObject request, WebSocketResponseBuilder response) {
-            ushort appointmentId = request.Value<ushort>("appointmentId");
-
-            bool deleted = repository.DeleteAppointment(appointmentId);
-            if (deleted) {
-                var data = new {
-                    appointmentId = appointmentId
-                };
-
-                response.SetData(data);
-                Sessions.Broadcast(response.GetResponse());
-            } else {
-                response.SetError("Falha ao deletar a consulta.");
                 response.SetStatusCode(400);
 
                 Send(response.GetResponse());

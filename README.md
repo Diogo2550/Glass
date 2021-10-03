@@ -78,14 +78,58 @@ Abaixo serão listados todos os end-points de forma detalhada.
 
     Retorno:
         se sucesso:
-            code: 200,
+            code: 200;
             data: {
-                message: string
+                message: string;
+            }
+</details>
+
+<details>
+    <summary>/appointment/make - HTTP:</summary>
+    POST:
+        Envio:
+            roomId: int;
+            professionalId: int;
+            patientId: int;
+            appointment: {
+                appointmentType: string;
+                appointmentDate: DateTime;
             }
 
-    se o login falha por causa do cliente (ex: senha/login errado):
-        code: 200,
-        error: string
+    Retorno:
+        se sucesso:
+            HTTP:
+                code: int;
+                data: string;
+                success: bool;
+            WebSocket:
+                code: int;
+                method: 'ADD_APPOINTMENT',
+                success: bool,
+                data: {
+                    appointment: Appointment
+                }
+</details>
+
+<details>
+    <summary>/appointment/cancel - HTTP:</summary>
+    POST:
+        Envio:
+            appointmentId: int;
+
+    Retorno:
+        se sucesso:
+            HTTP:
+                code: int;
+                data: string;
+                success: bool;
+            WebSocket:
+                code: 201;
+                method: 'ADD_APPOINTMENT',
+                success: true,
+                data: {
+                    appointment: Appointment;
+                }
 </details>
 
 
@@ -193,6 +237,22 @@ Abaixo serão listados todos os end-points de forma detalhada.
 </details>
 
 <details>
+    <summary>GET_ALL_ROOMS:</summary>
+
+    Envio:
+        method = "GET_ALL_ROOMS";
+
+    Retorno:
+        code: int;
+        success: bool;
+        componentId?: string;
+        error?: string;
+        data?: {
+            rooms: Array<Room>
+        }
+</details>
+
+<details>
     <summary>ADD_SCHEDULE:</summary>
 
     Envio:
@@ -257,35 +317,6 @@ Abaixo serão listados todos os end-points de forma detalhada.
 </details>
 
 <details>
-    <summary>ADD_APPOINTMENT:</summary>
-
-    Envio:
-        method = “ADD_APPOINTMENT”;
-        token: string;
-        roomId: int;
-        professionalId: int;
-        patientId: int;
-        appointment: Appointment {
-            appointmentDate,
-            appointmentType
-        }
-        componentId?: string;
-
-    Retorno - ALL:
-        method = “ADD_APPOINTMENT”;
-        code: int;
-        success: bool;
-        componentId?: string;
-        error?: string;
-        data?: {
-            professionalId: int;
-            patientId: int;
-            professionalId; int;
-            appointment: Appointment;
-        }
-</details>
-
-<details>
 	<summary>ADD_PATIENT:</summary>
 
     Envio:
@@ -304,6 +335,25 @@ Abaixo serão listados todos os end-points de forma detalhada.
             patient: Patient;
         }
         Obs: no momento o patient não deverá ser enviado com Records.
+</details>
+
+<details>
+    <summary>ADD_ROOM:</summary>
+
+    Envio:
+        method = "ADD_ROOM";
+        roomName: string;
+        componentId?: string;
+
+    Retorno - ALL:
+        method = “ADD_SCHEDULE”;
+        code: int;
+        success: bool;
+        componentId?: string;
+        error?: string;
+        data?: {
+            room: Room
+        }
 </details>
 
 <details>
@@ -363,26 +413,6 @@ Abaixo serão listados todos os end-points de forma detalhada.
         error?: string;
         data?: {
             employeeId: int
-        }
-</details>
-
-<details>
-    <summary>DELETE_APPOINTMENT:</summary>
-
-    Envio:
-        method = “DELETE_APPOINTMENT”
-        token: string;
-        appointmentId: int;
-        componentId?: string;
-
-    Retorno - ALL:
-        method = “DELETE_APPOINTMENT”;
-        code: int;
-        success: bool;
-        componentId?: string;
-        error?: string;
-        data?: {
-            appointmentId: int
         }
 </details>
 
