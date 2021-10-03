@@ -754,5 +754,6 @@ Um valor representando hora. Podem ser eles: ticks OU string.
 #### **EventualState:**
 | name | value
 |------|-------
-| Blocked | 0
-| Opened | 1
+| BlockedByAdmin | 0
+| BlockedByProfessional | 1
+| Opened | 2

@@ -1,6 +1,7 @@
 ﻿namespace Glass.Core.Enums {
     enum EventualState : ushort {
-        Blocked = 0,
-        Opened = 1
+        BlockedByAdmin = 0,
+        BlockedByProfessional = 1,
+        Opened = 2
     }
 }
