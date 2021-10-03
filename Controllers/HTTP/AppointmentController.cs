@@ -51,6 +51,7 @@ namespace Glass.Controllers.HTTP {
                 command.Parameters.AddWithValue("@room", appointment.Room.Id);
 
                 insertedId = command.ExecuteNonQuery();
+                appointment.SetId((ushort)command.LastInsertedId);
             }
 
             if (insertedId == -1) {
@@ -64,7 +65,6 @@ namespace Glass.Controllers.HTTP {
             response.SetStatusCode(201);
             response.Reply();
 
-            appointment.SetId((ushort)insertedId);
             var data = new {
                 method = "ADD_APPOINTMENT",
                 success = true,
