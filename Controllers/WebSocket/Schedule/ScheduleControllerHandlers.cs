@@ -240,9 +240,11 @@ namespace Glass.Controllers.WebSocket {
         public void DELETE_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
             ushort scheduleId = request.Value<ushort>("scheduleId");
 
+            Schedule schedule = repository.GetScheduleById(scheduleId);
+
             bool deleted = repository.DeleteFrom(scheduleId, "Schedule");
             var data = new {
-                scheduleId = scheduleId
+                schedule = schedule
             };
 
             SendDefaultResponse(deleted, response, data, "Falha ao deleter o cronograma.");
@@ -251,9 +253,11 @@ namespace Glass.Controllers.WebSocket {
         public void DELETE_EVENTUAL_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
             ushort eventualScheduleId = request.Value<ushort>("eventualScheduleId");
 
+            EventualSchedule eventualSchedule = repository.GetEventualScheduleById(eventualScheduleId);
+
             bool deleted = repository.DeleteFrom(eventualScheduleId, "EventualSchedule");
             var data = new {
-                eventualScheduleId = eventualScheduleId
+                eventualSchedule = eventualSchedule
             };
 
             SendDefaultResponse(deleted, response, data, "Falha ao deleter o cronograma eventual.");
@@ -262,9 +266,11 @@ namespace Glass.Controllers.WebSocket {
         public void DELETE_EMPLOYEE(JObject request, WebSocketResponseBuilder response) {
             ushort employeeId = request.Value<ushort>("employeeId");
 
+            Employee employee = repository.GetEmployeeById(employeeId);
+
             bool deleted = repository.DeleteFrom(employeeId, "Employee");
             var data = new {
-                employeeId = employeeId
+                employee = employee
             };
 
             SendDefaultResponse(deleted, response, data, "Falha ao deleter o funcionário.");
@@ -273,9 +279,11 @@ namespace Glass.Controllers.WebSocket {
         public void DELETE_PATIENT(JObject request, WebSocketResponseBuilder response) {
             ushort patientId = request.Value<ushort>("patientId");
 
+            Patient patient = repository.GetPatientById(patientId);
+
             bool deleted = repository.DeleteFrom(patientId, "Patient");
             var data = new {
-                patientId = patientId
+                patient = patient
             };
 
             SendDefaultResponse(deleted, response, data, "Falha ao deleter o paciente.");
@@ -284,9 +292,11 @@ namespace Glass.Controllers.WebSocket {
         public void DELETE_ROOM(JObject request, WebSocketResponseBuilder response) {
             ushort roomId = request.Value<ushort>("roomId");
 
+            Room room = repository.GetRoomById(roomId);
+
             bool deleted = repository.DeleteFrom(roomId, "Room");
             var data = new {
-                roomId = roomId
+                room = room
             };
 
             SendDefaultResponse(deleted, response, data, "Falha ao deleter o quarto.");

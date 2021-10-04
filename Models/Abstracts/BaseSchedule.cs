@@ -15,6 +15,11 @@ namespace Glass.Models.Abstracts {
         public TimeSpan EndTime { get; protected set; }
         [JsonProperty]
         public AppointmentFrequency Frequency { get; protected set; }
+        public Employee employee;
+
+        public BaseSchedule() {
+            employee = new Professional();
+        }
 
         public void SetId(ushort id) {
             Id = id;

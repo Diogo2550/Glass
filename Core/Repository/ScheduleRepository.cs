@@ -72,6 +72,31 @@ namespace Glass.Core.Repository {
             return patients;
         }
 
+        public Schedule GetScheduleById(ushort scheduleId) {
+            Schedule schedule = new Schedule();
+
+            using (var command = context.GetCommand()) {
+                command.CommandText = "SELECT * FROM Schedule WHERE id=@id";
+                command.Parameters.AddWithValue("@id", scheduleId);
+
+                command.Prepare();
+                using (var reader = command.ExecuteReader()) {
+                    if (reader.HasRows) {
+                        reader.Read();
+
+                        schedule.SetId(reader.GetUInt16("id"));
+                        schedule.SetDayOfWeek(reader.GetUInt16("dayOfWeek"));
+                        schedule.SetStartTime(reader.GetTimeSpan("startTime"));
+                        schedule.SetFrequency(reader.GetUInt16("frequency"));
+                        schedule.SetEndTime(reader.GetTimeSpan("endTime"));
+                        schedule.employee.SetId(reader.GetUInt16("employeeId"));
+                    }
+                }
+            }
+
+            return schedule;
+        }
+
         public List<Schedule> GetSchedulesFromEmployee(ushort employeeId) {
             var schedules = new List<Schedule>();
             using (var command = context.GetCommand()) {
@@ -98,6 +123,32 @@ namespace Glass.Core.Repository {
             }
             
             return schedules;
+        }
+
+        public EventualSchedule GetEventualScheduleById(ushort eventualScheduleId) {
+            EventualSchedule schedule = new EventualSchedule();
+
+            using (var command = context.GetCommand()) {
+                command.CommandText = "SELECT * FROM EventualSchedule WHERE id=@id";
+                command.Parameters.AddWithValue("@id", eventualScheduleId);
+
+                command.Prepare();
+                using (var reader = command.ExecuteReader()) {
+                    if (reader.HasRows) {
+                        reader.Read();
+
+                        schedule.SetId(reader.GetUInt16("id"));
+                        schedule.SetEventualDate(reader.GetDateTime("eventualDate"));
+                        schedule.SetStartTime(reader.GetTimeSpan("startTime"));
+                        schedule.SetEndTime(reader.GetTimeSpan("endTime"));
+                        schedule.SetFrequency(reader.GetUInt16("frequency"));
+                        schedule.SetEventualState(reader.GetUInt16("eventualState"));
+                        schedule.employee.SetId(reader.GetUInt16("employeeId"));
+                    }
+                }
+            }
+
+            return schedule;
         }
 
         public List<EventualSchedule> GetMonthlyEventualSchedulesFromEmployee(ushort employeeId, ushort month, int year) {
@@ -175,6 +226,34 @@ namespace Glass.Core.Repository {
             return appointments;
         }
 
+        public Employee GetEmployeeById(ushort id) {
+            Employee employee = null;
+
+            using (var command = context.GetCommand()) {
+                command.CommandText = "SELECT * FROM Employee WHERE id=@id";
+                command.Parameters.AddWithValue("@id", id);
+
+                command.Prepare();
+                using (var reader = command.ExecuteReader()) {
+                    if (reader.HasRows) {
+                        reader.Read();
+
+                        if (reader.GetUInt16("admin") == 1)
+                            employee = new Admin();
+                        else
+                            employee = new Professional();
+
+                        employee.SetId(reader.GetUInt16("id"));
+                        employee.SetName(GetStringSafe(reader, "name"));
+                        employee.SetPhone(GetStringSafe(reader, "phone"));
+                        employee.SetBirthday(reader.GetDateTime("birthday"));
+                    }
+                }
+            }
+
+            return employee;
+        }
+
         public List<Professional> GetAllProfessionals() {
             var professionals = new List<Professional>();
             using (var command = context.GetCommand()) {
@@ -195,6 +274,27 @@ namespace Glass.Core.Repository {
             }
 
             return professionals;
+        }
+
+        public Room GetRoomById(ushort id) {
+            Room room = new Room();
+
+            using (var command = context.GetCommand()) {
+                command.CommandText = "SELECT * FROM Room WHERE id=@id";
+                command.Parameters.AddWithValue("@id", id);
+
+                command.Prepare();
+                using (var reader = command.ExecuteReader()) {
+                    if (reader.HasRows) {
+                        reader.Read();
+
+                        room.SetId(reader.GetUInt16("id"));
+                        room.SetName(GetStringSafe(reader, "name"));
+                    }
+                }
+            }
+
+            return room;
         }
 
         public List<Room> GetAllRooms() {
