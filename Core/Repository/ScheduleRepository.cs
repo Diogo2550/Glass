@@ -226,6 +226,33 @@ namespace Glass.Core.Repository {
             return appointments;
         }
 
+        public List<Appointment> GetAppointmentsOnDay(DateTime day) {
+            var appointments = new List<Appointment>();
+
+            using (var command = context.GetCommand()) {
+                command.CommandText = $"SELECT * FROM Appointment WHERE appointmentDate BETWEEN '{day.ToString("yyyy-MM-dd 00:00:00")}' AND '{day.ToString("yyyy-MM-dd 23:59:59")}'";
+
+                using(var reader = command.ExecuteReader()) {
+                    while (reader.HasRows) {
+                        while (reader.Read()) {
+                            Appointment a = new Appointment();
+                            a.SetId(reader.GetUInt16("id"));
+                            a.SetAppointmentDate(reader.GetDateTime("appointmentDate"));
+                            a.SetAppointmentType(GetStringSafe(reader, "appointmentType"));
+                            a.Patient.SetId(reader.GetUInt16("patientId"));
+                            a.Room.SetId(reader.GetUInt16("roomId"));
+                            a.Professional.SetId(reader.GetUInt16("employeeId"));
+
+                            appointments.Add(a);
+                        }
+                        reader.NextResult();
+                    }
+                }
+            }
+
+            return appointments;
+        }
+
         public Employee GetEmployeeById(ushort id) {
             Employee employee = null;
 

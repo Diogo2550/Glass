@@ -1,4 +1,5 @@
-﻿using Glass.Core.Exceptions;
+﻿using Glass.Core.Enums;
+using Glass.Core.Exceptions;
 using Glass.Core.Util;
 using Glass.Core.WebSocket.Builders;
 using Glass.Models;
@@ -139,6 +140,25 @@ namespace Glass.Controllers.WebSocket {
             if (insertedId == -1) {
                 response.SetError("Falha ao inserir cronograma eventual");
                 return;
+            }
+
+            if(eventualSchedule.EventualState == EventualState.BlockedByAdmin || eventualSchedule.EventualState == EventualState.BlockedByProfessional) {
+                var appointments = repository.GetAppointmentsOnDay(eventualSchedule.EventualDate);
+                appointments.ForEach(x => {
+                    // Sem tempo de fazer direito D:
+                    // Deveria ser pego direto do banco de dados filtrado pelo id
+                    if(x.Professional.Id != employeeId) {
+                        return;
+                    }
+                    DateTime start = new DateTime(x.AppointmentDate.Year, x.AppointmentDate.Month, x.AppointmentDate.Day);
+                    DateTime end = new DateTime(x.AppointmentDate.Year, x.AppointmentDate.Month, x.AppointmentDate.Day);
+                    start = start.Add(eventualSchedule.StartTime);
+                    end = end.Add(eventualSchedule.EndTime);
+
+                    if (x.AppointmentDate >= start && x.AppointmentDate < end) {
+                        repository.DeleteFrom(x.Id, "Appointment");
+                    }
+                });
             }
 
             eventualSchedule.SetId((ushort)insertedId);
