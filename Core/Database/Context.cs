@@ -21,22 +21,18 @@ namespace Glass.Core.Database {
 
             try {
                 connection = new MySqlConnection(builder.ConnectionString);
-                connection.Open();
             } catch (MySqlException) {
                 throw new ExternalException("Erro ao inicar o MySQL. Verifique se as informações no Config.json estão corretas e tenha certeza de que o processo do mysql foi iniciado.");
             }
         }
 
-        public MySqlCommand GetCommand() {
-            if (connection.State == System.Data.ConnectionState.Closed) {
-                connection.Open();
-            }
-            return connection.CreateCommand();
+        public MySqlConnection GetConnection() {
+            return connection;
         }
 
-        public async Task<MySqlCommand> GetCommandAsync() {
+        public MySqlCommand GetCommand() {
             if (connection.State == System.Data.ConnectionState.Closed) {
-                await connection.OpenAsync();
+                throw new Exception("Tentativa de acessar o banco sem iniciar a conexão.");
             }
             return connection.CreateCommand();
         }

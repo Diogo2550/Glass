@@ -99,6 +99,8 @@ namespace Glass.Core.Repository {
 
         public List<Schedule> GetSchedulesFromEmployee(ushort employeeId) {
             var schedules = new List<Schedule>();
+
+            context.GetConnection().Open();
             using (var command = context.GetCommand()) {
                 command.CommandText = "SELECT id,dayOfWeek,startTime,endTime,frequency FROM Schedule WHERE employeeId=@employeeId";
                 command.Parameters.AddWithValue("@employeeId", employeeId);
@@ -121,7 +123,7 @@ namespace Glass.Core.Repository {
                     }
                 }
             }
-            
+            context.GetConnection().Close();
             return schedules;
         }
 
@@ -156,6 +158,7 @@ namespace Glass.Core.Repository {
 
             DateTime startDate = new DateTime(year, month, 1);
             DateTime endDate = (startDate.AddMonths(1)).AddDays(-1);
+            context.GetConnection().Open();
             using (var command = context.GetCommand()) {
                 command.CommandText = @"SELECT id,eventualDate,startTime,endTime,frequency,eventualState FROM EventualSchedule WHERE employeeId=@employeeId AND eventualDate BETWEEN @monthStart AND @monthEnd";
                 command.Parameters.AddWithValue("@employeeId", employeeId);
@@ -180,7 +183,7 @@ namespace Glass.Core.Repository {
                     }
                 }
             }
-
+            context.GetConnection().Close();
             return eventualSchedules;
         }
 
@@ -189,6 +192,7 @@ namespace Glass.Core.Repository {
 
             DateTime startDate = new DateTime(year, month, 1);
             DateTime endDate = (startDate.AddMonths(1)).AddDays(-1);
+            context.GetConnection().Open();
             using (var command = context.GetCommand()) {
                 StringBuilder builder = new StringBuilder();
                 builder.Append("SELECT a.id, a.appointmentDate, a.appointmentType, p.id, p.fullName, r.id, r.name");
@@ -222,13 +226,14 @@ namespace Glass.Core.Repository {
                     }
                 }
             }
-
+            context.GetConnection().Close();
             return appointments;
         }
 
         public List<Appointment> GetAppointmentsOnDay(DateTime day) {
             var appointments = new List<Appointment>();
 
+            context.GetConnection().Open();
             using (var command = context.GetCommand()) {
                 command.CommandText = $"SELECT * FROM Appointment WHERE appointmentDate BETWEEN '{day.ToString("yyyy-MM-dd 00:00:00")}' AND '{day.ToString("yyyy-MM-dd 23:59:59")}'";
 
@@ -249,7 +254,7 @@ namespace Glass.Core.Repository {
                     }
                 }
             }
-
+            context.GetConnection().Close();
             return appointments;
         }
 
@@ -283,6 +288,7 @@ namespace Glass.Core.Repository {
 
         public List<Professional> GetAllProfessionals() {
             var professionals = new List<Professional>();
+            context.GetConnection().Open();
             using (var command = context.GetCommand()) {
                 command.CommandText = "SELECT id, name FROM Employee WHERE admin=0";
 
@@ -299,7 +305,7 @@ namespace Glass.Core.Repository {
                     }
                 }
             }
-
+            context.GetConnection().Close();
             return professionals;
         }
 
@@ -326,7 +332,7 @@ namespace Glass.Core.Repository {
 
         public List<Room> GetAllRooms() {
             List<Room> rooms = new List<Room>();
-
+            context.GetConnection().Open();
             using (var command = context.GetCommand()) {
                 command.CommandText = "SELECT * FROM Room";
 
@@ -345,7 +351,7 @@ namespace Glass.Core.Repository {
                     }
                 }
             }
-
+            context.GetConnection().Close();
             return rooms;
         }
         #endregion
@@ -368,6 +374,9 @@ namespace Glass.Core.Repository {
         }
 
         public int AddEventualScheduleToEmployee(ushort employeeId, EventualSchedule eventualSchedule) {
+            int rows = 0;
+            int insertedId = 0;
+            context.GetConnection().Open();
             using (var command = context.GetCommand()) {
                 command.CommandText = "INSERT INTO EventualSchedule VALUES(DEFAULT, @eventualDate, @start, @end, @freq, @state, @employeeId)";
                 command.Parameters.AddWithValue("@eventualDate", eventualSchedule.EventualDate.ToString("yyyy-MM-dd HH:mm:ss"));
@@ -378,13 +387,16 @@ namespace Glass.Core.Repository {
                 command.Parameters.AddWithValue("@employeeId", employeeId);
 
                 command.Prepare();
-                int rows = command.ExecuteNonQuery();
-                
-                return (rows > 0) ? (short)command.LastInsertedId : -1;
+                rows = command.ExecuteNonQuery();
+                insertedId = (rows > 0) ? (short)command.LastInsertedId : -1;
             }
+            context.GetConnection().Close();
+            return insertedId;
         }
 
         public int AddAppointmentToEmployee(ushort employeeId, ushort roomId, ushort patientId, Appointment appointment) {
+            int insertedId;
+            context.GetConnection().Open();
             using (var command = context.GetCommand()) {
                 command.CommandText = "INSERT INTO Appointment VALUES(DEFAULT, @date, @type, @employee, @patient, @room)";
                 command.Parameters.AddWithValue("@date", appointment.AppointmentDate.ToString("yyyy-MM-dd HH:mm:ss"));
@@ -396,8 +408,10 @@ namespace Glass.Core.Repository {
                 command.Prepare();
                 int rows = command.ExecuteNonQuery();
 
-                return (rows > 0) ? (short)command.LastInsertedId : -1;
+                insertedId = (rows > 0) ? (short)command.LastInsertedId : -1;
             }
+            context.GetConnection().Close();
+            return insertedId;
         }
 
         public int AddEmployee(Employee employee) {
@@ -549,6 +563,8 @@ namespace Glass.Core.Repository {
 
         #region DELETE
         public bool DeleteFrom(ushort id, string table) {
+            bool deleted;
+            context.GetConnection().Open();
             using (var command = context.GetCommand()) {
                 command.CommandText = $"DELETE FROM {table} WHERE id=@id";
                 command.Parameters.AddWithValue("@id", id);
@@ -556,8 +572,10 @@ namespace Glass.Core.Repository {
                 command.Prepare();
                 int rows = command.ExecuteNonQuery();
 
-                return (rows > 0) ? true : false;
+                deleted = (rows > 0) ? true : false;
             }
+            context.GetConnection().Close();
+            return deleted;
         }
         #endregion
 
