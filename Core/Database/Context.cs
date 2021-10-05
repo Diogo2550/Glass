@@ -26,8 +26,10 @@ namespace Glass.Core.Database {
             }
         }
 
-        public MySqlConnection GetConnection() {
-            return connection;
+        public void GetConnection() {
+            if(connection.State == System.Data.ConnectionState.Closed) {
+                connection.Open();
+            }
         }
 
         public MySqlCommand GetCommand() {
@@ -35,6 +37,12 @@ namespace Glass.Core.Database {
                 throw new Exception("Tentativa de acessar o banco sem iniciar a conexão.");
             }
             return connection.CreateCommand();
+        }
+
+        public void CloseConnection() {
+            if(connection.State == System.Data.ConnectionState.Open) {
+                connection.Close();
+            }
         }
 
     }
