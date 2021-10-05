@@ -155,7 +155,7 @@ namespace Glass.Controllers.WebSocket {
                     start = start.Add(eventualSchedule.StartTime);
                     end = end.Add(eventualSchedule.EndTime);
 
-                    if (x.AppointmentDate >= start && x.AppointmentDate < end) {
+                    if (x.AppointmentDate >= start && x.AppointmentDate <= end) {
                         repository.DeleteFrom(x.Id, "Appointment");
                     }
                 });
