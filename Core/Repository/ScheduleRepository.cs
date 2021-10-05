@@ -130,6 +130,7 @@ namespace Glass.Core.Repository {
         public EventualSchedule GetEventualScheduleById(ushort eventualScheduleId) {
             EventualSchedule schedule = new EventualSchedule();
 
+            context.GetConnection().Open();
             using (var command = context.GetCommand()) {
                 command.CommandText = "SELECT * FROM EventualSchedule WHERE id=@id";
                 command.Parameters.AddWithValue("@id", eventualScheduleId);
@@ -149,6 +150,7 @@ namespace Glass.Core.Repository {
                     }
                 }
             }
+            context.GetConnection().Close();
 
             return schedule;
         }
