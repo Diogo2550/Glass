@@ -26,7 +26,11 @@ namespace Glass.Core.Database {
             }
         }
 
-        public void GetConnection() {
+        public string GetConnectionString() {
+            return builder.ConnectionString;
+        }
+
+        public void OpenConnection() {
             if(connection.State == System.Data.ConnectionState.Closed) {
                 connection.Open();
             }

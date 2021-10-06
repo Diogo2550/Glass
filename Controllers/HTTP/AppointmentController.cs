@@ -49,6 +49,7 @@ namespace Glass.Controllers.HTTP {
             appointment.Patient.SetId(patientId);
 
             int affectedRows;
+            context.OpenConnection();
             using (var command = context.GetCommand()) {
                 command.CommandText = "INSERT INTO Appointment VALUES(DEFAULT, @date, @type, @employee, @patient, @room)";
                 command.Parameters.AddWithValue("@date", appointment.AppointmentDate.ToString("yyyy-MM-dd HH:mm:ss"));
@@ -60,6 +61,7 @@ namespace Glass.Controllers.HTTP {
                 affectedRows = command.ExecuteNonQuery();
                 appointment.SetId((ushort)command.LastInsertedId);
             }
+            context.CloseConnection();
 
             if (affectedRows == 0) {
                 response.SetError("Falha ao adicionar consulta para o funcionário.");
@@ -98,6 +100,7 @@ namespace Glass.Controllers.HTTP {
                 return;
             }
 
+            context.OpenConnection();
             Appointment appointment = new Appointment();
             using (var command = context.GetCommand()) {
                 command.CommandText = "SELECT * FROM Appointment WHERE id=@id";
@@ -122,6 +125,7 @@ namespace Glass.Controllers.HTTP {
 
                 affectedRows = command.ExecuteNonQuery();
             }
+            context.CloseConnection();
 
             if (affectedRows == 0) {
                 response.SetError($"Não existem uma consulta com o id {appointmentId}");
