@@ -426,7 +426,7 @@ namespace Glass.Controllers.WebSocket {
         }
 
         public void UPDATE_ROOM(JObject request, WebSocketResponseBuilder response) {
-            Room room = null;
+            Room room = new Room();
             ushort roomId = request.SelectToken("room").Value<ushort>("id");
             string roomName = request.SelectToken("room").Value<string>("name");
             if(roomId == 0) {
@@ -436,12 +436,14 @@ namespace Glass.Controllers.WebSocket {
                 return;
             }
 
+            bool updated = repository.UpdateRoom(room);
+
             room.SetId(roomId);
+            room.SetName(roomName);
             var data = new {
                 room = room
             };
             
-            bool updated = repository.UpdateRoom(room);
             SendDefaultResponse(updated, response, data, "Falha ao atulizar o quarto.");
         }
         #endregion
