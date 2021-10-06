@@ -23,44 +23,47 @@ namespace Glass.Controllers.HTTP {
             string cpf = body.Value<string>("cpf");
             string password = body.Value<string>("password");
 
-            using(var command = context.GetCommand()) {
-                command.CommandText = "SELECT password,id,name,admin FROM Employee WHERE cpf=@cpf LIMIT 1";
-                command.Parameters.AddWithValue("@cpf", cpf);
+            using (var conn = new MySqlConnection(context.GetConnectionString())) {
+                conn.Open();
+                using (var command = context.GetCommand()) {
+                    command.CommandText = "SELECT password,id,name,admin FROM Employee WHERE cpf=@cpf LIMIT 1";
+                    command.Parameters.AddWithValue("@cpf", cpf);
 
-                using (var reader = command.ExecuteReader()) {
-                    string userPassword = null, name = null;
-                    bool isAdmin = false;
-                    int id = 0;
-                    if (reader.HasRows) {
-                        reader.Read();
-                        userPassword = reader.GetFieldValue<string>(0);
-                        id = reader.GetFieldValue<int>(1);
-                        name = reader.GetFieldValue<string>(2);
-                        isAdmin = reader.GetFieldValue<bool>(3);
+                    using (var reader = command.ExecuteReader()) {
+                        string userPassword = null, name = null;
+                        bool isAdmin = false;
+                        int id = 0;
+                        if (reader.HasRows) {
+                            reader.Read();
+                            userPassword = reader.GetFieldValue<string>(0);
+                            id = reader.GetFieldValue<int>(1);
+                            name = reader.GetFieldValue<string>(2);
+                            isAdmin = reader.GetFieldValue<bool>(3);
 
-                        reader.NextResult();
-                    }
+                            reader.NextResult();
+                        }
 
-                    var hashBuilder = MD5.Create();
-                    byte[] hash = hashBuilder.ComputeHash(Encoding.UTF8.GetBytes(password));
+                        var hashBuilder = MD5.Create();
+                        byte[] hash = hashBuilder.ComputeHash(Encoding.UTF8.GetBytes(password));
 
-                    StringBuilder sBuilder = new StringBuilder();
-                    for (int i = 0; i < hash.Length; i++) {
-                        sBuilder.Append(hash[i].ToString("x2"));
-                    }
-                    
-                    if (userPassword == null || userPassword != sBuilder.ToString()) {
-                        response.SetError("Usuário ou senha inválidos!");
+                        StringBuilder sBuilder = new StringBuilder();
+                        for (int i = 0; i < hash.Length; i++) {
+                            sBuilder.Append(hash[i].ToString("x2"));
+                        }
+
+                        if (userPassword == null || userPassword != sBuilder.ToString()) {
+                            response.SetError("Usuário ou senha inválidos!");
+                            response.Reply();
+                            return;
+                        }
+
+                        var data = new {
+                            message = "Usuário logado com sucesso!",
+                            token = JWT.Create(id, name, isAdmin)
+                        };
+                        response.SetData(data);
                         response.Reply();
-                        return;
                     }
-
-                    var data = new {
-                        message = "Usuário logado com sucesso!",
-                        token = JWT.Create(id, name, isAdmin)
-                    };
-                    response.SetData(data);
-                    response.Reply();
                 }
             }
         }
@@ -86,29 +89,31 @@ namespace Glass.Controllers.HTTP {
                 return;
             }
 
-            using (var command = context.GetCommand()) {
-                command.CommandText = "INSERT INTO employee VALUES(DEFAULT, @name, @cpf, @rg, @birthday, @phone, MD5(@password), @admin)";
-                command.Parameters.AddWithValue("@name", employee.Name);
-                command.Parameters.AddWithValue("@cpf", employee.CPF);
-                command.Parameters.AddWithValue("@rg", employee.RG);
-                command.Parameters.AddWithValue("@phone", employee.Phone);
-                command.Parameters.AddWithValue("@birthday", employee.Birthday);
-                command.Parameters.AddWithValue("@password", employee.Password);
-                command.Parameters.AddWithValue("@admin", employee.IsAdmin());
+            using (var conn = new MySqlConnection(context.GetConnectionString())) {
+                conn.Open();
+                using (var command = context.GetCommand()) {
+                    command.CommandText = "INSERT INTO employee VALUES(DEFAULT, @name, @cpf, @rg, @birthday, @phone, MD5(@password), @admin)";
+                    command.Parameters.AddWithValue("@name", employee.Name);
+                    command.Parameters.AddWithValue("@cpf", employee.CPF);
+                    command.Parameters.AddWithValue("@rg", employee.RG);
+                    command.Parameters.AddWithValue("@phone", employee.Phone);
+                    command.Parameters.AddWithValue("@birthday", employee.Birthday);
+                    command.Parameters.AddWithValue("@password", employee.Password);
+                    command.Parameters.AddWithValue("@admin", employee.IsAdmin());
 
-                try {
-                    command.ExecuteNonQuery();
-                } catch(MySqlException ex) {
-                    if(ex.Number == 1062) {
-                        response.SetError("Não foi possível cadastrar o usuário. CPF já existente em nossa base de dados.");
-                    } else {
-                        response.SetStatusCode(500);
-                        response.SetError(ex.Message);
+                    try {
+                        command.ExecuteNonQuery();
+                    } catch (MySqlException ex) {
+                        if (ex.Number == 1062) {
+                            response.SetError("Não foi possível cadastrar o usuário. CPF já existente em nossa base de dados.");
+                        } else {
+                            response.SetStatusCode(500);
+                            response.SetError(ex.Message);
+                        }
                     }
-
-                    response.Reply();
-                    return;
                 }
+                context.CloseConnection();
+                response.Reply();
             }
         }
 
