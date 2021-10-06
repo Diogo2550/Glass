@@ -70,7 +70,7 @@ namespace Glass.Controllers.HTTP {
                 conn.Open();
                 using (var command = conn.CreateCommand()) {
                     StringBuilder b = new StringBuilder();
-                    b.Append("SELECT a.id, a.appointmentDate, a.appointmentType, e.id, e.name, e.phone, r.id, r.name, p.id, p.fullName, p.phone FROM Appointment a");
+                    b.Append("SELECT a.id aid, a.appointmentDate aad, a.appointmentType aat, e.id eid, e.name en, e.phone ep, r.id, r.name rn, p.id rid, p.fullName rfn, p.phone pp FROM Appointment a");
                     b.Append(" INNER JOIN patient p ON p.id=a.patientId");
                     b.Append(" INNER JOIN employee e ON e.id=a.patientId");
                     b.Append(" INNER JOIN room r ON r.id=a.patientId");

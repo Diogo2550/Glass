@@ -436,10 +436,10 @@ namespace Glass.Controllers.WebSocket {
                 return;
             }
 
-            bool updated = repository.UpdateRoom(room);
-
             room.SetId(roomId);
             room.SetName(roomName);
+            bool updated = repository.UpdateRoom(room);
+
             var data = new {
                 room = room
             };
