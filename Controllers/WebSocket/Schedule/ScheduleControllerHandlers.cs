@@ -427,8 +427,8 @@ namespace Glass.Controllers.WebSocket {
 
         public void UPDATE_ROOM(JObject request, WebSocketResponseBuilder response) {
             Room room = null;
-            ushort roomId = request.SelectToken("room").Value<ushort>("roomId");
-            string roomName = request.SelectToken("room").Value<string>("roomName");
+            ushort roomId = request.SelectToken("room").Value<ushort>("id");
+            string roomName = request.SelectToken("room").Value<string>("name");
             if(roomId == 0) {
                 response.SetError("O parâmetro roomId é obrigatório.");
                 response.SetStatusCode(400);
