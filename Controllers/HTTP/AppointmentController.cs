@@ -78,9 +78,11 @@ namespace Glass.Controllers.HTTP {
 
                     command.CommandText = b.ToString();
                     command.Parameters.AddWithValue("@id", appointment.Id);
+                    Console.WriteLine("Entrou aqui");
 
                     using (var reader = command.ExecuteReader()) {
                         while (reader.Read()) {
+                            Console.WriteLine("Entrou aqui;");
                             returnedAppointment.SetId(reader.GetUInt16(0));
                             returnedAppointment.SetAppointmentDate(reader.GetDateTime(1));
                             returnedAppointment.SetAppointmentType(reader.GetString(2));
@@ -96,6 +98,7 @@ namespace Glass.Controllers.HTTP {
                     }
                 }
             }
+            Console.WriteLine(returnedAppointment.Id);
 
             response.SetData("Consulta marcada com sucesso!");
             response.SetStatusCode(201);
