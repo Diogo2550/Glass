@@ -669,7 +669,7 @@ namespace Glass.Core.Repository {
             using(var mysql = new MySqlConnection(context.GetConnectionString())) {
 				mysql.Open();
 				using (var command = mysql.CreateCommand()) {
-					command.CommandText = "UPDATE Room SET fullName=@name WHERE id=@id";
+					command.CommandText = "UPDATE Room SET name=@name WHERE id=@id";
 					command.Parameters.AddWithValue("@name", room.Name);
 					command.Parameters.AddWithValue("@id", room.Id);
 
