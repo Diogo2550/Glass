@@ -1,4 +1,5 @@
 ﻿using Glass.Core.Database;
+using Glass.Core.Enums;
 using Glass.Models;
 using Glass.Models.Abstracts;
 using MySqlConnector;
@@ -163,7 +164,37 @@ namespace Glass.Core.Repository {
             return schedule;
         }
 
-        public List<EventualSchedule> GetMonthlyEventualSchedulesFromEmployee(ushort employeeId, ushort month, int year) {
+		public EventualSchedule GetDayBlockedToAll(DateTime date) {
+			EventualSchedule schedule = new EventualSchedule();
+
+			using (var mysql = new MySqlConnection(context.GetConnectionString())) {
+				mysql.Open();
+				using (var command = mysql.CreateCommand()) {
+					command.CommandText = "SELECT * FROM EventualSchedule WHERE eventualDate BETWEEN @dateStart AND @dateEnd LIMIT 1";
+					command.Parameters.AddWithValue("@dateStart", date.ToString("yyyy-MM-dd 00:00:00"));
+					command.Parameters.AddWithValue("@dateEnd", date.ToString("yyyy-MM-dd 23:59:59"));
+
+					using (var reader = command.ExecuteReader()) {
+						if (reader.HasRows) {
+							reader.Read();
+
+							schedule.SetId(reader.GetUInt16("id"));
+							schedule.SetEventualDate(reader.GetDateTime("eventualDate"));
+							schedule.SetStartTime(reader.GetTimeSpan("startTime"));
+							schedule.SetEndTime(reader.GetTimeSpan("endTime"));
+							schedule.SetFrequency(reader.GetUInt16("frequency"));
+							schedule.SetEventualState(reader.GetUInt16("eventualState"));
+							schedule.employee.SetId(reader.GetUInt16("employeeId"));
+						}
+					}
+				}
+			}
+
+			return schedule;
+		}
+
+
+		public List<EventualSchedule> GetMonthlyEventualSchedulesFromEmployee(ushort employeeId, ushort month, int year) {
             var eventualSchedules = new List<EventualSchedule>();
 
             DateTime startDate = new DateTime(year, month, 1);
@@ -269,7 +300,40 @@ namespace Glass.Core.Repository {
             return appointments;
         }
 
-        public Employee GetEmployeeById(ushort id) {
+		public List<Employee> GetAllEmployees() {
+			var employees = new List<Employee>();
+
+			using (var mysql = new MySqlConnection(context.GetConnectionString())) {
+				mysql.Open();
+				using (var command = mysql.CreateCommand()) {
+					command.CommandText = $"SELECT id, birthday, name, admin, phone FROM Employee";
+
+					using (var reader = command.ExecuteReader()) {
+						while (reader.HasRows) {
+							while (reader.Read()) {
+								Employee employee;
+								if (reader.GetUInt16("admin") == 1)
+									employee = new Admin();
+								else
+									employee = new Professional();
+
+								employee.SetId(reader.GetUInt16("id"));
+								employee.SetBirthday(reader.GetDateTime("birthday"));
+								employee.SetName(GetStringSafe(reader, "name"));
+								employee.SetPhone(GetStringSafe(reader, "phone"));
+
+								employees.Add(employee);
+							}
+							reader.NextResult();
+						}
+					}
+				}
+			}
+
+			return employees;
+		}
+
+		public Employee GetEmployeeById(ushort id) {
             Employee employee = null;
 
             using(var mysql = new MySqlConnection(context.GetConnectionString())) {
@@ -616,12 +680,12 @@ namespace Glass.Core.Repository {
             }
             return updated;
         }
-        #endregion
+		#endregion
 
-        #region DELETE
-        public bool DeleteFrom(ushort id, string table) {
-            bool deleted;
-            using(var mysql = new MySqlConnection(context.GetConnectionString())) {
+		#region DELETE
+		public bool DeleteFrom(ushort id, string table) {
+			bool deleted;
+			using (var mysql = new MySqlConnection(context.GetConnectionString())) {
 				mysql.Open();
 				using (var command = mysql.CreateCommand()) {
 					command.CommandText = $"DELETE FROM {table} WHERE id=@id";
@@ -631,13 +695,30 @@ namespace Glass.Core.Repository {
 
 					deleted = (rows > 0) ? true : false;
 				}
-            }
-            return deleted;
-        }
-        #endregion
+			}
+			return deleted;
+		}
 
-        // MÉTODOS PARA FACILITAR AS BUSCAS
-        private static string GetStringSafe(IDataReader reader, int colIndex) {
+		public bool DeleteEventualScheduleByDate(DateTime date) {
+			bool deleted;
+			using (var mysql = new MySqlConnection(context.GetConnectionString())) {
+				mysql.Open();
+				using (var command = mysql.CreateCommand()) {
+					command.CommandText = $"DELETE FROM EventualSchedule WHERE eventualDate BETWEEN @dateStart AND @dateEnd";
+					command.Parameters.AddWithValue("@dateStart", date.ToString("yyyy-MM-dd 00:00:00"));
+					command.Parameters.AddWithValue("@dateEnd", date.ToString("yyyy-MM-dd 23:59:59"));
+
+					int rows = command.ExecuteNonQuery();
+
+					deleted = (rows > 0) ? true : false;
+				}
+			}
+			return deleted;
+		}
+		#endregion
+
+		// MÉTODOS PARA FACILITAR AS BUSCAS
+		private static string GetStringSafe(IDataReader reader, int colIndex) {
             if (!reader.IsDBNull(colIndex))
                 return reader.GetString(colIndex);
             else

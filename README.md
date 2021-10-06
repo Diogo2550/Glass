@@ -404,7 +404,7 @@ Abaixo serão listados todos os end-points de forma detalhada.
         componentId?: string;
         error?: string;
         data?: {
-            scheduleId: int
+            schedule: Schedule
         }
 </details>
         
@@ -424,7 +424,7 @@ Abaixo serão listados todos os end-points de forma detalhada.
         componentId?: string;
         error?: string;
         data?: {
-            eventualScheduleId: int
+            eventualSchedule: EventualSchedule
         }
 </details>
 
@@ -444,7 +444,7 @@ Abaixo serão listados todos os end-points de forma detalhada.
         componentId?: string;
         error?: string;
         data?: {
-            employeeId: int
+            employee: Employee
         }
 </details>
 
@@ -464,7 +464,7 @@ Abaixo serão listados todos os end-points de forma detalhada.
         componentId?: string;
         error?: string;
         data?: {
-            patientId: int
+            patient: Patient
         }
 </details>
 
@@ -484,7 +484,7 @@ Abaixo serão listados todos os end-points de forma detalhada.
         componentId?: string;
         error?: string;
         data?: {
-            roomId: int
+            room: Room
         }
 </details>
 </details>
@@ -620,6 +620,52 @@ Abaixo serão listados todos os end-points de forma detalhada.
         }
 </details>
 </details>
+
+<br>
+
+<details>
+	<summary>ESPECIAIS</summary>
+
+<details>
+	<summary>BLOCK_DAY_TO_ALL</summary>
+	Envio:
+        method = 'BLOCK_DAY_TO_ALL';
+        token: string;
+        eventualSchedule: EventualSchedule;
+        componentId?: string;
+
+    Retorno - ALL:
+        method = 'ADD_EVENTUAL_SCHEDULE';
+        code: int;
+        success: bool;
+        componentId?: string;
+        error?: string;
+        data?: {
+            eventualSchedule = eventualSchedule
+        }
+
+</details>
+<details>
+	<summary>UNLOCK_DAY_TO_ALL</summary>
+	Envio:
+        method = 'UNLOCK_DAY_TO_ALL';
+        token: string;
+        date: DateTime; // Apenas a data será levada em consideração
+        componentId?: string;
+
+    Retorno - ALL:
+        method = 'ADD_EVENTUAL_SCHEDULE';
+        code: int;
+        success: bool;
+        componentId?: string;
+        error?: string;
+        data?: {
+            eventualSchedule = eventualSchedule
+        }
+
+</details>
+</details>
+
 <br>
 
 ---
@@ -688,7 +734,7 @@ Abaixo serão listados todos os end-points de forma detalhada.
 
 <br>
 
-#### **Room: **
+#### **Room:**
 | name | type
 |------|-------
 | id | int

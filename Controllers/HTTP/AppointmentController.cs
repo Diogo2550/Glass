@@ -81,17 +81,17 @@ namespace Glass.Controllers.HTTP {
 
                     using (var reader = command.ExecuteReader()) {
                         while (reader.Read()) {
-                            appointment.SetId(reader.GetUInt16(0));
-                            appointment.SetAppointmentDate(reader.GetDateTime(1));
-                            appointment.SetAppointmentType(reader.GetString(2));
-                            appointment.Professional.SetId(reader.GetUInt16(3));
-                            appointment.Professional.SetName(reader.GetString(4));
-                            appointment.Professional.SetPhone(reader.GetString(5));
-                            appointment.Room.SetId(reader.GetUInt16(6));
-                            appointment.Room.SetName(reader.GetString(7));
-                            appointment.Patient.SetId(reader.GetUInt16(8));
-                            appointment.Patient.SetName(reader.GetString(9));
-                            appointment.Patient.SetPhone(reader.GetString(10));
+                            returnedAppointment.SetId(reader.GetUInt16(0));
+                            returnedAppointment.SetAppointmentDate(reader.GetDateTime(1));
+                            returnedAppointment.SetAppointmentType(reader.GetString(2));
+                            returnedAppointment.Professional.SetId(reader.GetUInt16(3));
+                            returnedAppointment.Professional.SetName(reader.GetString(4));
+                            returnedAppointment.Professional.SetPhone(reader.GetString(5));
+                            returnedAppointment.Room.SetId(reader.GetUInt16(6));
+                            returnedAppointment.Room.SetName(reader.GetString(7));
+                            returnedAppointment.Patient.SetId(reader.GetUInt16(8));
+                            returnedAppointment.Patient.SetName(reader.GetString(9));
+                            returnedAppointment.Patient.SetPhone(reader.GetString(10));
                         }
                     }
                 }
@@ -102,7 +102,7 @@ namespace Glass.Controllers.HTTP {
             response.Reply();
 
             var data = new {
-                appointment = appointment,
+                appointment = returnedAppointment,
             };
 
             WebSocketResponseBuilder wsBuilder = new WebSocketResponseBuilder();

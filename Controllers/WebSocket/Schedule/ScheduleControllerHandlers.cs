@@ -7,6 +7,7 @@ using Glass.Models.Abstracts;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -131,7 +132,7 @@ namespace Glass.Controllers.WebSocket {
             EventualSchedule eventualSchedule = null;
             try {
                 eventualSchedule = RequestObjectFactory.BuildEventualSchedule(request.SelectToken("eventualSchedule"));
-            } catch(InvalidRequestArgument ex) {
+            } catch (InvalidRequestArgument ex) {
                 Send(ex.response.GetResponse());
                 return;
             }
@@ -142,12 +143,12 @@ namespace Glass.Controllers.WebSocket {
                 return;
             }
 
-            if(eventualSchedule.EventualState == EventualState.BlockedByAdmin || eventualSchedule.EventualState == EventualState.BlockedByProfessional) {
+            if (eventualSchedule.EventualState == EventualState.BlockedByAdmin || eventualSchedule.EventualState == EventualState.BlockedByProfessional) {
                 var appointments = repository.GetAppointmentsOnDay(eventualSchedule.EventualDate);
                 appointments.ForEach(x => {
                     // Sem tempo de fazer direito D:
                     // Deveria ser pego direto do banco de dados filtrado pelo id
-                    if(x.Professional.Id != employeeId) {
+                    if (x.Professional.Id != employeeId) {
                         return;
                     }
                     DateTime start = new DateTime(x.AppointmentDate.Year, x.AppointmentDate.Month, x.AppointmentDate.Day);
@@ -445,7 +446,63 @@ namespace Glass.Controllers.WebSocket {
         }
         #endregion
 
-        
+        #region Especial
+        public void BLOCK_DAY_TO_ALL(JObject request, WebSocketResponseBuilder response) {
+            EventualSchedule eventualSchedule = null;
+            try {
+                eventualSchedule = RequestObjectFactory.BuildEventualSchedule(request.SelectToken("eventualSchedule"));
+            } catch (InvalidRequestArgument ex) {
+                Send(ex.response.GetResponse());
+                return;
+            }
+
+            eventualSchedule.SetStartTime(TimeSpan.Parse("00:00:00"));
+            eventualSchedule.SetEndTime(TimeSpan.Parse("23:59:59"));
+            repository.DeleteEventualScheduleByDate(eventualSchedule.EventualDate);
+
+            int insertedId = -1;
+            var employees = repository.GetAllEmployees();
+            employees.ForEach(x => {
+                insertedId = repository.AddEventualScheduleToEmployee(x.Id, eventualSchedule);
+            });
+            if (insertedId == -1) {
+                response.SetError("Falha ao inserir cronograma eventual");
+                return;
+            }
+
+            eventualSchedule.SetId((ushort)insertedId);
+            var data = new {
+                eventualSchedule = eventualSchedule
+            };
+
+            response.SetData(data);
+            response.SetMethod("ADD_EVENTUAL_SCHEDULE");
+            response.SetStatusCode(201);
+            Sessions.Broadcast(response.GetResponse());
+        }
+
+        public void UNLOCK_DAY_TO_ALL(JObject request, WebSocketResponseBuilder response) {
+            string date = request.SelectToken("date").Value<string>();
+            DateTime dateToUnlock = DateTime.Parse(date);
+
+            var eventualSchedule = repository.GetDayBlockedToAll(dateToUnlock);
+            eventualSchedule.SetId(0);
+
+            bool deleted = repository.DeleteEventualScheduleByDate(dateToUnlock);
+            if (!deleted) {
+                response.SetError("Falha ao inserir cronograma eventual");
+                return;
+            }
+
+            var data = new {
+                eventualSchedule = eventualSchedule
+            };
+
+            response.SetData(data);
+            response.SetStatusCode(201);
+            Sessions.Broadcast(response.GetResponse());
+        }
+        #endregion
 
         // MÉTODOS UTILITÁRIOS
         private void SendDefaultResponse(bool success, WebSocketResponseBuilder response, object data, string errorMessage = "Error") {
