@@ -273,8 +273,14 @@ namespace Glass.Controllers.WebSocket {
 
         public void DELETE_EVENTUAL_SCHEDULE(JObject request, WebSocketResponseBuilder response) {
             ushort eventualScheduleId = request.Value<ushort>("eventualScheduleId");
+            ushort employeeId = request.Value<ushort>("employeeId");
 
             EventualSchedule eventualSchedule = repository.GetEventualScheduleById(eventualScheduleId);
+
+            if (eventualSchedule.EventualState == EventualState.BlockedByAdmin || eventualSchedule.EventualState == EventualState.BlockedByProfessional) {
+                EventualSchedule aux = repository.GetEventualScheduleById(eventualScheduleId);
+                repository.DeleteEventualScheduleByDateFrom(employeeId, aux.EventualDate);
+            }
 
             bool deleted = repository.DeleteFrom(eventualScheduleId, "EventualSchedule");
             var data = new {

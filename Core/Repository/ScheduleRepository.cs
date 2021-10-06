@@ -715,6 +715,24 @@ namespace Glass.Core.Repository {
 			}
 			return deleted;
 		}
+
+		public bool DeleteEventualScheduleByDateFrom(ushort employeeId, DateTime date) {
+			bool deleted;
+			using (var mysql = new MySqlConnection(context.GetConnectionString())) {
+				mysql.Open();
+				using (var command = mysql.CreateCommand()) {
+					command.CommandText = $"DELETE FROM EventualSchedule WHERE eventualDate BETWEEN @dateStart AND @dateEnd AND employeeId=@id";
+					command.Parameters.AddWithValue("@dateStart", date.ToString("yyyy-MM-dd 00:00:00"));
+					command.Parameters.AddWithValue("@dateEnd", date.ToString("yyyy-MM-dd 23:59:59"));
+					command.Parameters.AddWithValue("@id", employeeId);
+
+					int rows = command.ExecuteNonQuery();
+
+					deleted = (rows > 0) ? true : false;
+				}
+			}
+			return deleted;
+		}
 		#endregion
 
 		// MÉTODOS PARA FACILITAR AS BUSCAS
