@@ -112,7 +112,6 @@ namespace Glass.Controllers.HTTP {
                         }
                     }
                 }
-                context.CloseConnection();
                 response.Reply();
             }
         }

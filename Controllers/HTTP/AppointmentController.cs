@@ -159,7 +159,7 @@ namespace Glass.Controllers.HTTP {
                     }
                 }
 
-                using (var command = context.GetCommand()) {
+                using (var command = conn.CreateCommand()) {
                     command.CommandText = "DELETE FROM Appointment WHERE id=@id";
                     command.Parameters.AddWithValue("@id", appointmentId);
 
