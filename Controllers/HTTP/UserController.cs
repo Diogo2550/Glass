@@ -25,7 +25,7 @@ namespace Glass.Controllers.HTTP {
 
             using (var conn = new MySqlConnection(context.GetConnectionString())) {
                 conn.Open();
-                using (var command = context.GetCommand()) {
+                using (var command = conn.CreateCommand()) {
                     command.CommandText = "SELECT password,id,name,admin FROM Employee WHERE cpf=@cpf LIMIT 1";
                     command.Parameters.AddWithValue("@cpf", cpf);
 
@@ -91,7 +91,7 @@ namespace Glass.Controllers.HTTP {
 
             using (var conn = new MySqlConnection(context.GetConnectionString())) {
                 conn.Open();
-                using (var command = context.GetCommand()) {
+                using (var command = conn.CreateCommand()) {
                     command.CommandText = "INSERT INTO employee VALUES(DEFAULT, @name, @cpf, @rg, @birthday, @phone, MD5(@password), @admin)";
                     command.Parameters.AddWithValue("@name", employee.Name);
                     command.Parameters.AddWithValue("@cpf", employee.CPF);

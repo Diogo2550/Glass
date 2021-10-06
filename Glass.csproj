@@ -195,7 +195,6 @@
     <Compile Include="Core\HTTP\HTTPRequestInfo.cs" />
     <Compile Include="Core\HTTP\HTTPRouter.cs" />
     <Compile Include="Core\HTTP\Interfaces\IHTTPRouter.cs" />
-    <Compile Include="Core\Repository\LoginRepository.cs" />
     <Compile Include="Core\Repository\ScheduleRepository.cs" />
     <Compile Include="Core\Util\JWT.cs" />
     <Compile Include="Core\Util\RegexValidator.cs" />
